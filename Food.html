@@ -102,6 +102,46 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
 .quickGroupTitle{font-weight:700;color:var(--clay);font-size:.9rem}
 .comboTag{display:inline-block;background:var(--sage-soft);border-radius:999px;padding:2px 8px;font-size:.7rem;color:#526044;margin-top:4px}
 
+
+/* 分類快速加入：分類卡兩兩並排，展開內容維持卡片內直排 */
+#quickAddGroups{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+#quickAddGroups .group{
+  margin-bottom:0;
+  border-radius:18px;
+  box-shadow:0 10px 28px -24px rgba(80,60,40,.55);
+  overflow:hidden;
+}
+#quickAddGroups .grouphead{
+  min-height:74px;
+  padding:16px 16px;
+  align-items:center;
+  background:linear-gradient(135deg,#fffdf9,#f8fbf3);
+}
+#quickAddGroups .grouphead b{
+  font-size:1rem;
+}
+#quickAddGroups .grouphead small{
+  font-size:.76rem;
+  margin-top:3px;
+}
+#quickAddGroups .groupbody{
+  padding:12px;
+}
+#quickAddGroups .itemgrid{
+  grid-template-columns:1fr;
+}
+#quickAddGroups .itembtn{
+  border-radius:14px;
+  padding:12px 13px;
+}
+@media(max-width:640px){
+  #quickAddGroups{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -135,7 +175,7 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
         <div class="heroTitle">今日營養 Dashboard</div>
         <div class="heroSub">食材資料庫會依 gram / ml / qty 自動換算今日總量。</div>
       </div>
-      <div class="badge">Food OS v1.4.2.4.6.2</div>
+      <div class="badge">Food OS</div>
     </div>
     <div class="grid4" id="metricGrid"></div>
     <div class="coachpanel" style="margin-top:10px">
@@ -711,7 +751,7 @@ function renderQuickAddGroups(){
   ].filter(g=>g.names.length);
 
   quickAddGroups.innerHTML=groups.map(g=>`
-    <div class="group">
+    <div class="group quick-category-card">
       <button class="grouphead" data-toggle><span><b>${g.title}</b><small>${g.names.length} 個項目</small></span><span>▼</span></button>
       <div class="groupbody quickGroupBody">
         <div class="itemgrid">
