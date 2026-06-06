@@ -149,7 +149,7 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
 <header>
   <div class="kicker">personal fitness os</div>
   <h1>Food OS</h1>
-  <div class="sub">個人食材資料庫 + 每日飲食紀錄 + custom 臨時食物模式 + Combo + Guide & Prompts。大雞蛋固定 1 顆 = 60g；今日紀錄保留完整快速加入，分類區改為完整食材按鈕；JSON 範例改為可展開；工具只算缺口，不做假智慧推薦；Guide & Prompts 改為可擴展 category 與穩定 JSON 規則。</div>
+  <div class="sub"></div>
 </header>
 
 <nav>
@@ -251,9 +251,10 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
   ]
 }'></textarea>
       <div class="jsonbar">
-        <button class="primary" id="importLogJson">匯入</button>
-        <button id="exportLogJson">匯出今日</button>
-        <button id="exportAllJson">匯出全部備份</button>
+        <button class="primary" id="importLogJson">選擇檔案匯入</button>
+        <button id="importLogJsonText">貼上內容匯入</button>
+        <button id="exportLogJson">匯出今日檔案</button>
+        <button id="exportAllJson">匯出全部備份檔</button>
         <button id="clearLogJson">清空</button>
       </div>
       <div class="jsonmsg" id="logMsg"></div>
@@ -289,7 +290,7 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
 }'></textarea>
     <div class="jsonbar">
       <button class="primary" id="importCombo">新增 / 更新 Combo</button>
-      <button id="exportCombos">匯出 Combo</button>
+      <button id="exportCombos">匯出 Combo 檔案</button>
       <button id="clearComboJson">清空</button>
     </div>
     <div class="jsonmsg" id="comboMsg"></div>
@@ -308,7 +309,7 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
 }'></textarea>
     <div class="jsonbar">
       <button class="primary" id="importFoodDb">新增到資料庫</button>
-      <button id="exportFoodDb">匯出整個食材資料庫</button>
+      <button id="exportFoodDb">匯出食材資料庫檔案</button>
       <button id="clearFoodDbJson">清空</button>
     </div>
     <div class="jsonmsg" id="foodDbMsg"></div>
@@ -330,7 +331,8 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
     <h2>🧾 全部資料備份</h2>
     <div class="hint">建議每週或每次大改前匯出一次，避免 localStorage 損壞或換裝置造成資料遺失。</div>
     <div class="jsonbar">
-      <button class="primary" id="exportAllJsonHistory">匯出全部備份</button>
+      <button class="primary" id="exportAllJsonHistory">匯出全部備份檔</button>
+      <button id="importAllJsonHistory">匯入全部備份檔</button>
     </div>
   </div>
 </section>
@@ -511,7 +513,7 @@ protein, carbs, fruit, vegetable, fat, drink, snack, dessert, supplement, sauce,
   </div>
 </section>
 
-<footer>Food OS v1.4.2.4.6.2 是個人紀錄工具，不是醫療或營養建議。營養標示與實際份量仍可能有誤差。</footer>
+<footer>Food OS 是個人紀錄工具，不是醫療或營養建議。營養標示與實際份量仍可能有誤差。</footer>
 </div>
 
 <script>
@@ -603,6 +605,36 @@ function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt
 function fmtNum(n){n=Number(n)||0;return Number.isInteger(n)?String(n):n.toFixed(1).replace(/\.0$/,"")}
 function save(){localStorage.setItem(KEY,JSON.stringify(DATA))}
 function load(){try{const v=localStorage.getItem(KEY);if(v)DATA=Object.assign(DATA,JSON.parse(v))}catch(e){}}
+function downloadJSON(filename,data){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+function chooseJSONFile(callback){
+  const input=document.createElement("input");
+  input.type="file"; input.accept="application/json,.json";
+  input.onchange=()=>{
+    const file=input.files&&input.files[0]; if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{try{callback(JSON.parse(reader.result),file)}catch(e){alert("JSON 檔案格式錯誤。")}};
+    reader.readAsText(file);
+  };
+  input.click();
+}
+function importFoodBackup(raw){
+  if(raw.foods)DATA.foods=raw.foods;
+  if(raw.combos)DATA.combos=raw.combos;
+  if(raw.settings)DATA.settings=raw.settings;
+  if(raw.entries)DATA.entries=raw.entries;
+  if(raw.logs){
+    DATA.entries={};
+    raw.logs.forEach(x=>{if(x.date)DATA.entries[x.date]=x.food||[]});
+  }
+  save();renderAll();
+}
+
 function foodsMap(){return Object.fromEntries(DATA.foods.map(f=>[f.name,f]))}
 function combosMap(){return Object.fromEntries((DATA.combos||[]).map(c=>[c.name,c]))}
 function standardName(name){return ALIASES[name]||name}
@@ -797,11 +829,17 @@ document.body.addEventListener("click",e=>{
   const q=e.target.closest("[data-quick-food]"); if(q){addLog(q.dataset.quickFood,q.dataset.unit,q.dataset.amount);return}
   const x=e.target.closest(".x"); if(x){E().splice(+x.dataset.i,1);save();renderAll();return}
 });
-importLogJson.onclick=()=>{try{const input=JSON.parse(logJson.value);const r=importLogs(input);logMsg.textContent=`已匯入 ${r.added} 筆到 ${r.date}${r.missing.length?`，custom 缺營養素：${r.missing.join("、")}`:""}`}catch(e){logMsg.textContent="JSON 格式錯誤"}};
-exportLogJson.onclick=()=>{logJson.value=JSON.stringify({date:cur,food:E()},null,2);logMsg.textContent="已匯出今日紀錄（含日期）"};
+function handleFoodDailyImport(input){
+  const r=importLogs(input);
+  logMsg.textContent=`已匯入 ${r.added} 筆到 ${r.date}${r.missing.length?`，custom 缺營養素：${r.missing.join("、")}`:""}`;
+}
+importLogJson.onclick=()=>chooseJSONFile(input=>handleFoodDailyImport(input));
+if(document.getElementById("importLogJsonText")) importLogJsonText.onclick=()=>{try{handleFoodDailyImport(JSON.parse(logJson.value))}catch(e){logMsg.textContent="JSON 格式錯誤"}};
+exportLogJson.onclick=()=>{downloadJSON(`FoodOS_${cur}_daily.json`,{date:cur,food:E()});logMsg.textContent="已下載今日紀錄 JSON 檔"};
 clearLogJson.onclick=()=>{logJson.value="";logMsg.textContent=""};
-if(document.getElementById("exportAllJson")) exportAllJson.onclick=()=>{logJson.value=JSON.stringify(exportAllBackup(),null,2);logMsg.textContent="已匯出全部備份"};
-if(document.getElementById("exportAllJsonHistory")) exportAllJsonHistory.onclick=()=>{const text=JSON.stringify(exportAllBackup(),null,2);navigator.clipboard&&navigator.clipboard.writeText(text);alert("全部備份 JSON 已複製到剪貼簿，也可回到今日紀錄頁匯出查看。")};
+if(document.getElementById("exportAllJson")) exportAllJson.onclick=()=>{downloadJSON(`FoodOS_backup_${ymd(new Date())}.json`,exportAllBackup());logMsg.textContent="已下載全部備份 JSON 檔"};
+if(document.getElementById("exportAllJsonHistory")) exportAllJsonHistory.onclick=()=>downloadJSON(`FoodOS_backup_${ymd(new Date())}.json`,exportAllBackup());
+if(document.getElementById("importAllJsonHistory")) importAllJsonHistory.onclick=()=>chooseJSONFile(raw=>{if(!confirm("匯入全部備份會覆蓋目前 Food OS 資料，確定嗎？"))return;importFoodBackup(raw);alert("Food OS 全部備份已匯入。")});
 
 function importComboData(raw){
   const arr=Array.isArray(raw)?raw:[raw];
@@ -824,7 +862,7 @@ importFoodDb.onclick=()=>{
     save();renderAll();foodDbMsg.textContent=`已新增/更新 ${n} 筆食材`;
   }catch(e){foodDbMsg.textContent="JSON 格式錯誤"}
 };
-exportFoodDb.onclick=()=>{foodDbJson.value=JSON.stringify({foods:DATA.foods,combos:DATA.combos},null,2);foodDbMsg.textContent="已匯出食材資料庫"};
+exportFoodDb.onclick=()=>{downloadJSON(`FoodOS_food_database_${ymd(new Date())}.json`,{foods:DATA.foods,combos:DATA.combos});foodDbMsg.textContent="已下載食材資料庫 JSON 檔"};
 clearFoodDbJson.onclick=()=>{foodDbJson.value="";foodDbMsg.textContent=""};
 saveSettings.onclick=()=>{DATA.settings={calories:+targetCalories.value||1300,protein:+targetProtein.value||105,carbs:+targetCarbs.value||90,fat:+targetFat.value||45};save();saved.classList.add("show");setTimeout(()=>saved.classList.remove("show"),1200);renderAll()};
 reset.onclick=()=>{if(confirm("確定清空所有 Food OS 資料？")){localStorage.removeItem(KEY);location.reload()}};
@@ -835,7 +873,7 @@ importCombo.onclick=()=>{
     comboMsg.textContent=`已新增/更新 ${r.added} 個 Combo${r.bad.length?`，格式錯誤：${r.bad.join("、")}`:""}`;
   }catch(e){comboMsg.textContent="JSON 格式錯誤"}
 };
-exportCombos.onclick=()=>{comboJson.value=JSON.stringify(DATA.combos||[],null,2);comboMsg.textContent="已匯出 Combo"};
+exportCombos.onclick=()=>{downloadJSON(`FoodOS_combos_${ymd(new Date())}.json`,DATA.combos||[]);comboMsg.textContent="已下載 Combo JSON 檔"};
 clearComboJson.onclick=()=>{comboJson.value="";comboMsg.textContent=""};
 if(document.getElementById("foodSelect")){
   foodSelect.addEventListener("change",updateGlobalServingHint);

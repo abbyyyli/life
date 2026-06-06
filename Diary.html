@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>每日節奏 · Daily Rhythm v2.3.3</title>
+<title>Daily Rhythm</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Noto+Sans+TC:wght@400;500&family=Noto+Serif+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -252,7 +252,7 @@ footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:28px;lin
   .more-btn,.picker{padding-left:18px;padding-right:18px}
 }
 
-/* Daily Rhythm v2.3.3 v2 */
+/* Daily Rhythm v2.3.6 v2 */
 .summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
 .summary-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 13px}
 .summary-box .v{font-family:"Fraunces",serif;font-size:1.22rem;color:var(--sage);line-height:1.1}
@@ -324,8 +324,8 @@ footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:28px;lin
 <div class="wrap">
 <header>
   <div class="kicker">daily rhythm · summary hub</div>
-  <h1>每日節奏</h1>
-  <div class="sub">生活紀錄為主；Food / Workout / Learning / Other 的 JSON 同步都收在設定頁。</div>
+  <h1>My Diary</h1>
+  <div class="sub"></div>
 </header>
 
 <nav>
@@ -658,8 +658,10 @@ footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:28px;lin
     <div class="acc-body" id="accBackup">
       <p>匯出可備份或搬到其他裝置；匯入會覆蓋現有資料。</p>
       <div class="btn-row">
-        <button class="ghost" id="exportBtn">⬇ 匯出 JSON</button>
-        <button class="ghost" id="importToggle">⬆ 匯入 JSON</button>
+        <button class="ghost" id="exportDayBtn">⬇ 匯出今日 JSON 檔</button>
+        <button class="ghost" id="exportBtn">⬇ 匯出全部 JSON 檔</button>
+        <button class="ghost" id="importFileBtn">⬆ 選擇檔案匯入</button>
+        <button class="ghost" id="importToggle">貼上 JSON 匯入</button>
       </div>
       <div id="importWrap" style="display:none;margin-top:10px">
         <textarea class="import-area" id="importArea" placeholder="貼上先前匯出的 JSON 內容…"></textarea>
@@ -701,7 +703,7 @@ const DEFAULTS = {
 };
 
 /* ═══ STORAGE ═══ */
-const KEY = "life_summary_v233";
+const KEY = "life_summary_v236";
 let DATA = JSON.parse(JSON.stringify(DEFAULTS));
 function save(){ try{localStorage.setItem(KEY,JSON.stringify(DATA));}catch(e){} }
 function load(){
@@ -1270,25 +1272,54 @@ document.getElementById("addFlowBtn").onclick=()=>{
 };
 document.getElementById("addFlowIn").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("addFlowBtn").click();});
 
-// export / import
-document.getElementById("exportBtn").onclick=()=>{
-  const blob=new Blob([JSON.stringify(DATA,null,2)],{type:"application/json"});
+
+function downloadJSON(filename,data){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");a.href=url;a.download=`每日節奏_${ymd(new Date())}.json`;a.click();URL.revokeObjectURL(url);
+  const a=document.createElement("a");
+  a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+function chooseJSONFile(callback){
+  const input=document.createElement("input");
+  input.type="file"; input.accept="application/json,.json";
+  input.onchange=()=>{
+    const file=input.files&&input.files[0]; if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{try{callback(JSON.parse(reader.result),file)}catch(e){alert("JSON 檔案格式錯誤。")}};
+    reader.readAsText(file);
+  };
+  input.click();
+}
+function applyDiaryBackup(parsed){
+  if(!parsed.entries){alert("格式不正確。需要包含 entries。");return false;}
+  if(!confirm("確定匯入？這會覆蓋現有的全部資料。"))return false;
+  DATA=Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),parsed);
+  save();
+  document.getElementById("targets").value=DATA.targets||"";
+  renderSettings();renderToday();
+  return true;
+}
+
+// export / import
+document.getElementById("exportDayBtn").onclick=()=>{
+  downloadJSON(`DailyRhythm_${cur}_daily.json`,{date:cur,entry:E()});
 };
+document.getElementById("exportBtn").onclick=()=>{
+  downloadJSON(`DailyRhythm_backup_${ymd(new Date())}.json`,DATA);
+};
+document.getElementById("importFileBtn").onclick=()=>chooseJSONFile(parsed=>{if(applyDiaryBackup(parsed))flash("importOK")});
 document.getElementById("importToggle").onclick=()=>{
   const w=document.getElementById("importWrap");w.style.display=w.style.display==="none"?"block":"none";
 };
 document.getElementById("importConfirm").onclick=()=>{
   const text=document.getElementById("importArea").value.trim();if(!text)return;
   let parsed;try{parsed=JSON.parse(text);}catch(e){alert("JSON 格式錯誤。");return;}
-  if(!parsed.entries){alert("格式不正確。");return;}
-  if(!confirm("確定匯入？這會覆蓋現有的全部資料。"))return;
-  DATA=Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),parsed);
-  save();document.getElementById("importArea").value="";
-  document.getElementById("importWrap").style.display="none";
-  document.getElementById("targets").value=DATA.targets||"";
-  renderSettings();renderToday();flash("importOK");
+  if(applyDiaryBackup(parsed)){
+    document.getElementById("importArea").value="";
+    document.getElementById("importWrap").style.display="none";
+    flash("importOK");
+  }
 };
 document.getElementById("reset").onclick=()=>{
   if(confirm("確定清空全部紀錄嗎？建議先備份。")){

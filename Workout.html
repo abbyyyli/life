@@ -272,7 +272,7 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
 <header>
   <div class="kicker">personal fitness os</div>
   <h1>Workout Coach OS</h1>
-  <div class="sub">教練優先，不是記錄壓力。Today 看課表，Import 接 Hevy，Review 給下週調整。</div>
+  <div class="sub"></div>
 </header>
 
 <nav>
@@ -296,7 +296,6 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
         <div class="heroTitle">本週訓練 Dashboard</div>
         <div class="heroSub">看趨勢，不看單日。重點是知道這週哪裡練到了、哪裡需要調整。</div>
       </div>
-      <div class="badge">v1.2.1</div>
     </div>
     <div class="grid4" id="metricGrid"></div>
     <div class="note" id="dashNote"></div>
@@ -391,7 +390,7 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
 }'></textarea>
       <div class="jsonbar">
         <button class="primary" id="importExerciseJson">新增 / 更新動作</button>
-        <button id="exportExerciseJson">匯出 Exercise Library</button>
+        <button id="exportExerciseJson">匯出 Exercise Library 檔案</button>
         <button id="clearExerciseJson">清空</button>
       </div>
       <div class="jsonmsg" id="exerciseMsg"></div>
@@ -426,9 +425,11 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
   ]
 }'></textarea>
       <div class="jsonbar">
-        <button class="primary" id="importWorkoutJson">匯入</button>
-        <button id="exportTodayJson">匯出今日</button>
-        <button id="exportAllJson">匯出全部備份</button>
+        <button class="primary" id="importWorkoutJson">選擇檔案匯入</button>
+        <button id="importWorkoutJsonText">貼上內容匯入</button>
+        <button id="exportTodayJson">匯出今日檔案</button>
+        <button id="exportAllJson">匯出全部備份檔</button>
+        <button id="importBackupJson">匯入全部備份檔</button>
         <button id="clearWorkoutJson">清空</button>
       </div>
       <div class="jsonmsg" id="importMsg"></div>
@@ -524,7 +525,7 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
   </div>
 </section>
 
-<footer>Workout Coach OS v1.2.1 是個人訓練輔助工具，不是醫療或復健建議；疼痛請停止並尋求專業協助。</footer>
+<footer>Workout Coach OS 是個人訓練輔助工具，不是醫療或復健建議；疼痛請停止並尋求專業協助。</footer>
 </div>
 
 <script>
@@ -742,7 +743,35 @@ function importExercises(raw){
   return {added:n,bad};
 }
 
-function exportAll(){return {version:"1.2.0",exportedAt:new Date().toISOString(),currentWeek:DATA.currentWeek,templates:DATA.templates,exerciseLibrary:DATA.exerciseLibrary||EXERCISES,logs:DATA.logs,notes:DATA.notes}}
+
+function downloadJSON(filename,data){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+function chooseJSONFile(callback){
+  const input=document.createElement("input");
+  input.type="file"; input.accept="application/json,.json";
+  input.onchange=()=>{
+    const file=input.files&&input.files[0]; if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{try{callback(JSON.parse(reader.result),file)}catch(e){alert("JSON 檔案格式錯誤。")}};
+    reader.readAsText(file);
+  };
+  input.click();
+}
+function importWorkoutBackup(raw){
+  if(raw.currentWeek)DATA.currentWeek=raw.currentWeek;
+  if(raw.templates)DATA.templates=raw.templates;
+  if(raw.exerciseLibrary)DATA.exerciseLibrary=raw.exerciseLibrary;
+  if(raw.logs)DATA.logs=raw.logs;
+  if(raw.notes)DATA.notes=raw.notes;
+  save();renderAll();
+}
+
+function exportAll(){return {version:"1.2.1-file",exportedAt:new Date().toISOString(),currentWeek:DATA.currentWeek,templates:DATA.templates,exerciseLibrary:DATA.exerciseLibrary||EXERCISES,logs:DATA.logs,notes:DATA.notes}}
 function renderAll(){renderDashboard();renderToday();renderWeek();renderTemplates();renderLibrary();renderHistory();renderNotes();renderProgress();}
 document.body.addEventListener("click",e=>{
  const tab=e.target.closest("nav button"); if(tab){document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));tab.classList.add("on");document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));document.getElementById(tab.dataset.tab).classList.add("on");renderAll();return}
@@ -755,13 +784,16 @@ document.body.addEventListener("click",e=>{
 });
 todayWorkoutSelect.addEventListener("change",()=>{const idx=+todayWorkoutSelect.value; const d=parseYmd(currentWeekStart()); d.setDate(d.getDate()+idx); cur=ymd(d); renderAll();});
 saveWeek.onclick=()=>{document.querySelectorAll("[data-week]").forEach(inp=>{const i=+inp.dataset.week;DATA.currentWeek[i].plan=inp.value.split(",").map(x=>x.trim()).filter(Boolean)});save();weekSaved.classList.add("show");setTimeout(()=>weekSaved.classList.remove("show"),1200);renderAll()};
-importWorkoutJson.onclick=()=>{try{const r=importWorkout(JSON.parse(workoutJson.value));importMsg.textContent=`已匯入 ${r.count} 個動作到 ${r.date}`}catch(e){importMsg.textContent="JSON 格式錯誤"}};
-exportTodayJson.onclick=()=>{workoutJson.value=JSON.stringify(E(),null,2);importMsg.textContent="已匯出今日訓練"};
-exportAllJson.onclick=()=>{workoutJson.value=JSON.stringify(exportAll(),null,2);importMsg.textContent="已匯出全部備份"};
+function handleWorkoutDailyImport(input){const r=importWorkout(input);importMsg.textContent=`已匯入 ${r.count} 個動作到 ${r.date}`}
+importWorkoutJson.onclick=()=>chooseJSONFile(input=>handleWorkoutDailyImport(input));
+if(document.getElementById("importWorkoutJsonText")) importWorkoutJsonText.onclick=()=>{try{handleWorkoutDailyImport(JSON.parse(workoutJson.value))}catch(e){importMsg.textContent="JSON 格式錯誤"}};
+exportTodayJson.onclick=()=>{downloadJSON(`Workout_${cur}_daily.json`,{date:cur,workout:workoutNameForDate(cur),exercises:E()});importMsg.textContent="已下載今日訓練 JSON 檔"};
+exportAllJson.onclick=()=>{downloadJSON(`Workout_backup_${ymd(new Date())}.json`,exportAll());importMsg.textContent="已下載全部備份 JSON 檔"};
 clearWorkoutJson.onclick=()=>{workoutJson.value="";importMsg.textContent=""};
+if(document.getElementById("importBackupJson")) importBackupJson.onclick=()=>chooseJSONFile(raw=>{if(!confirm("匯入全部備份會覆蓋目前 Workout Coach OS 資料，確定嗎？"))return;importWorkoutBackup(raw);importMsg.textContent="已匯入全部備份 JSON 檔"});
 
 if(document.getElementById("importExerciseJson")) importExerciseJson.onclick=()=>{try{const r=importExercises(JSON.parse(exerciseJson.value));exerciseMsg.textContent=`已新增/更新 ${r.added} 個動作${r.bad.length?`，格式錯誤：${r.bad.join("、")}`:""}`}catch(e){exerciseMsg.textContent="JSON 格式錯誤"}};
-if(document.getElementById("exportExerciseJson")) exportExerciseJson.onclick=()=>{exerciseJson.value=JSON.stringify(DATA.exerciseLibrary||EXERCISES,null,2);exerciseMsg.textContent="已匯出 Exercise Library"};
+if(document.getElementById("exportExerciseJson")) exportExerciseJson.onclick=()=>{downloadJSON(`Workout_exercise_library_${ymd(new Date())}.json`,DATA.exerciseLibrary||EXERCISES);exerciseMsg.textContent="已下載 Exercise Library JSON 檔"};
 if(document.getElementById("clearExerciseJson")) clearExerciseJson.onclick=()=>{exerciseJson.value="";exerciseMsg.textContent=""};
 
 addNote.onclick=()=>{DATA.notes.push({date:cur,exercise:noteExercise.value||"未指定",type:noteType.value,text:noteText.value||""});noteExercise.value="";noteText.value="";save();renderAll()};
