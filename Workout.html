@@ -170,6 +170,101 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
 }
 #weekEditor input[data-week]::placeholder{color:#b3a690}
 
+
+/* Exercise Library：分類卡兩兩並排，展開後動作卡直排 */
+#exerciseLibrary{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+#exerciseLibrary .group{
+  margin-bottom:0;
+  border-radius:18px;
+  box-shadow:0 10px 28px -24px rgba(80,60,40,.55);
+  overflow:hidden;
+}
+#exerciseLibrary .grouphead{
+  min-height:74px;
+  padding:16px 16px;
+  align-items:center;
+  background:linear-gradient(135deg,#fffdf9,#f8fbf3);
+}
+#exerciseLibrary .grouphead b{
+  font-size:1rem;
+}
+#exerciseLibrary .grouphead small{
+  font-size:.76rem;
+  margin-top:3px;
+}
+#exerciseLibrary .groupbody{
+  padding:12px;
+}
+#exerciseLibrary .itemgrid{
+  grid-template-columns:1fr;
+}
+#exerciseLibrary .itemcard{
+  border-radius:14px;
+  padding:13px 14px;
+}
+@media(max-width:640px){
+  #exerciseLibrary{grid-template-columns:1fr}
+}
+
+
+/* Workout 區塊卡統一：Dashboard / Current Week / Templates 兩兩並排 */
+#weekStatus,
+#weekEditor,
+#templateList{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+#weekStatus .group,
+#weekEditor .group,
+#templateList .group{
+  margin-bottom:0;
+  border-radius:18px;
+  box-shadow:0 10px 28px -24px rgba(80,60,40,.55);
+  overflow:hidden;
+}
+#weekStatus .grouphead,
+#weekEditor .grouphead,
+#templateList .grouphead{
+  min-height:74px;
+  padding:16px 16px;
+  align-items:center;
+  background:linear-gradient(135deg,#fffdf9,#f8fbf3);
+}
+#weekStatus .grouphead b,
+#weekEditor .grouphead b,
+#templateList .grouphead b{
+  font-size:1rem;
+}
+#weekStatus .grouphead small,
+#weekEditor .grouphead small,
+#templateList .grouphead small{
+  font-size:.76rem;
+  margin-top:3px;
+}
+#weekEditor .groupbody,
+#templateList .groupbody{
+  padding:12px;
+}
+#templateList .itemgrid{
+  grid-template-columns:1fr;
+}
+#templateList .itemcard{
+  border-radius:14px;
+  padding:12px 13px;
+}
+@media(max-width:640px){
+  #weekStatus,
+  #weekEditor,
+  #templateList{
+    grid-template-columns:1fr;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -564,7 +659,7 @@ function renderToday(){
   todayWorkoutSelect.innerHTML=DATA.currentWeek.map((d,i)=>`<option value="${i}">${d.day}｜${d.plan.join(" + ")}</option>`).join("");
   todayWorkoutSelect.value=(parseYmd(cur).getDay()+6)%7;
   const exs=flattenPlan(plan.plan);
-  todayWorkout.innerHTML=`<div class="note">今天：${plan.plan.join(" + ")}</div>` + exs.map(e=>{
+  todayWorkout.innerHTML=exs.map(e=>{
     const info=exInfo(e.name); const saved=(E().exercises||[]).find(x=>x.name===e.name)||{};
     return `<div class="group open"><button class="grouphead" data-toggle><span><b>${esc(e.name)}</b><small>${e.sets} 組｜${e.reps}｜${info.equipment||""}</small></span><span>▼</span></button>
     <div class="groupbody">
@@ -594,7 +689,7 @@ function renderLibrary(){
   const cats={臀:"🍑 臀",腿:"🦵 腿",肩:"🏋️ 肩",背:"🪽 背",手臂:"💪 手臂",核心:"🔥 核心",暖身:"🌡 暖身",有氧:"🚶 有氧",伸展:"🧘 伸展"};
   const grouped={}; (DATA.exerciseLibrary||EXERCISES).forEach(e=>{if(!grouped[e.cat])grouped[e.cat]=[]; grouped[e.cat].push(e)});
   exerciseLibrary.innerHTML=Object.entries(grouped).map(([cat,items])=>`
-    <div class="group">
+    <div class="group exercise-category-card">
       <button class="grouphead" data-toggle><span><b>${cats[cat]||cat}</b><small>${items.length} 個動作</small></span><span>▼</span></button>
       <div class="groupbody"><div class="itemgrid">
         ${items.map(e=>`

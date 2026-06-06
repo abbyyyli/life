@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>每日節奏 · 生活儀表板</title>
+<title>每日節奏 · Daily Rhythm v2.3.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Noto+Sans+TC:wght@400;500&family=Noto+Serif+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -247,14 +247,81 @@ footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:28px;lin
   .sec,.date-sec{padding:16px 18px}
   .more-btn,.picker{padding-left:18px;padding-right:18px}
 }
+
+/* Daily Rhythm v2.3.3 v2 */
+.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.summary-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 13px}
+.summary-box .v{font-family:"Fraunces",serif;font-size:1.22rem;color:var(--sage);line-height:1.1}
+.summary-box .l{font-size:.72rem;color:var(--muted);margin-top:2px}
+.summary-list{list-style:none;margin-top:10px}
+.summary-list li{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line);padding:6px 0;font-size:.86rem}
+.summary-list li:last-child{border-bottom:none}
+.summary-empty{font-size:.84rem;color:var(--muted);font-style:italic;margin-top:8px}
+.state-group{margin-bottom:14px}
+.state-title{font-size:.76rem;color:var(--muted);margin-bottom:7px;font-weight:500}
+.state-row{display:flex;gap:7px;flex-wrap:wrap}
+.state-btn{background:var(--paper);color:var(--ink);border:1px solid var(--line);padding:6px 12px;border-radius:99px;font-family:inherit;font-size:.82rem;cursor:pointer;transition:.15s}
+.state-btn:hover{border-color:var(--sage)}
+.state-btn.sel{background:var(--sage);color:#fff;border-color:var(--sage)}
+.rhythm-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rhythm-row .state-btn{border-radius:12px;text-align:center;padding:10px 8px}
+@media(max-width:520px){.summary-grid,.rhythm-row{grid-template-columns:1fr}}
+.sync-split{display:grid;grid-template-columns:1fr;gap:14px}
+.sync-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px}
+.sync-card h3{font-family:"Noto Serif TC",serif;font-size:.95rem;margin-bottom:6px;color:var(--clay)}
+.sync-ta{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-family:monospace;font-size:.78rem;color:var(--ink);background:#fffdf9;resize:vertical;min-height:120px}
+.sync-ta:focus{outline:none;border-color:var(--sage)}
+.sync-msg{font-size:.76rem;color:var(--sage);min-height:1.1em;margin-top:6px}
+
+
+/* v2.1 wider layout + summary category cards */
+.wrap{max-width:840px}
+.summary-category-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:10px;
+}
+.summary-category-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:15px;
+  padding:13px 14px;
+}
+.summary-category-card .cat{
+  font-weight:700;
+  font-size:.92rem;
+  color:var(--clay);
+  margin-bottom:5px;
+}
+.summary-category-card .desc{
+  color:var(--muted);
+  font-size:.82rem;
+  line-height:1.65;
+}
+@media(max-width:640px){
+  .wrap{max-width:660px}
+  .summary-category-grid{grid-template-columns:1fr}
+}
+
+
+.sync-result{
+  margin-top:12px;
+  border-top:1px dashed var(--line);
+  padding-top:10px;
+}
+.sync-result .summary-empty{
+  margin-top:0;
+}
+
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <div class="kicker">daily rhythm · life dashboard</div>
+  <div class="kicker">daily rhythm · summary hub</div>
   <h1>每日節奏</h1>
-  <div class="sub">記錄，不評分。有在記，就已經在做了。</div>
+  <div class="sub">生活紀錄為主；Food / Workout / Learning / Other 的 JSON 同步都收在設定頁。</div>
 </header>
 
 <nav>
@@ -278,17 +345,26 @@ footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:28px;lin
   </div>
 
   <div class="sec">
-    <div class="sec-lbl">今天怎麼樣</div>
+    <div class="sec-lbl">今天一句話</div>
     <textarea class="journal" id="quoteInput" placeholder="隨手寫——一句話也好。"></textarea>
   </div>
 
   <div class="sec">
-    <div class="sec-lbl">心情</div>
+    <div class="sec-lbl">🌤 今天的狀態</div>
     <div class="mood-row" id="moodRow"></div>
     <div class="mood-selected" id="moodSelected"></div>
+
+    <div class="state-group" style="margin-top:16px">
+      <div class="state-title">今天有大致照著自己想要的節奏走嗎？</div>
+      <div class="rhythm-row" id="stateRhythm">
+        <button class="state-btn" data-v="有，照著走">🌱 有，照著走</button>
+        <button class="state-btn" data-v="普通／一半">🌤 普通／一半</button>
+        <button class="state-btn" data-v="沒有，今天亂了">🌧 沒有，今天亂了</button>
+      </div>
+    </div>
   </div>
 
-  <div class="sec">
+<div class="sec">
     <div class="sec-lbl">今日速記</div>
     <div class="ql-grid">
       <div class="ql-tile" data-picker="exPicker">
@@ -340,6 +416,7 @@ footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:28px;lin
     <div class="learn-tab-content" id="learnTabContent"></div>
   </div>
 
+
   <div class="sec">
     <div class="sec-lbl">今日小成就</div>
     <div class="win-add-row">
@@ -367,6 +444,28 @@ footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:28px;lin
     <div class="sec">
       <div class="sec-lbl">人際</div>
       <textarea class="dump" id="socialNote" placeholder="有什麼互動值得記一下？"></textarea>
+    </div>
+  </div>
+
+  <button class="more-btn" id="summaryToggle">
+    <span class="arr">›</span> 今日摘要（飲食・運動・學習・其他）
+  </button>
+  <div class="more-body" id="summaryBody">
+    <div class="sec">
+      <div class="sec-lbl">🍽 飲食</div>
+      <div id="foodSummaryView"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-lbl">🏋️ 運動</div>
+      <div id="workoutSummaryView"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-lbl">📚 學習</div>
+      <div id="learningSummaryView"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-lbl">🧩 其他</div>
+      <div id="otherSummaryView"></div>
     </div>
   </div>
 </div>
@@ -449,6 +548,104 @@ footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:28px;lin
   </div>
 
   <div class="sc">
+    <div class="sc-head" data-acc="accJsonPrompts">
+      <h2>🧠 Summary JSON Prompts</h2>
+      <span class="acc-arr">›</span>
+    </div>
+    <div class="acc-body" id="accJsonPrompts">
+      <p>把今天做的事丟給 AI，用這些 prompt 輸出可匯入 Diary 的摘要 JSON。規則：只輸出合法 JSON，不要 markdown，不要解釋。</p>
+
+      <div class="sync-card">
+        <h3>📚 Learning Summary Prompt</h3>
+        <textarea class="sync-ta" readonly>你是 Daily Rhythm 的 Learning Summary Parser。
+
+請將我今天的學習內容整理成 Diary 可匯入的 Learning JSON。
+
+輸出規則：
+1. 只輸出合法 JSON，不要 markdown，不要解釋。
+2. 格式必須是 {"date":"YYYY-MM-DD","learning":[]}。
+3. learning 是 array，每個 item 必須包含 category 和 items。
+4. category 是大類，例如：泰文、英文、AI、程式、Marketing、閱讀、求職、其他。
+5. items 是 array，列出具體做了什麼。
+6. 不要把所有內容塞進同一類；請依主題精準分類。
+7. 若我沒有給日期，使用今天日期。
+8. 內容要保留細節，但不要寫成長篇心得。
+
+範例輸出：
+{"date":"2026-06-07","learning":[{"category":"泰文","items":["Book 2 Ch2 課文內容","整理 10 個生活句型"]},{"category":"英文","items":["Shadowing 20 mins","練習咖啡廳面試回答"]}]}</textarea>
+      </div>
+
+      <div class="sync-card">
+        <h3>🧩 Other Summary Prompt</h3>
+        <textarea class="sync-ta" readonly>你是 Daily Rhythm 的 Other Summary Parser。
+
+請將我今天除了飲食、運動、學習以外的生活事項整理成 Diary 可匯入的 Other JSON。
+
+輸出規則：
+1. 只輸出合法 JSON，不要 markdown，不要解釋。
+2. 格式必須是 {"date":"YYYY-MM-DD","other":[]}。
+3. other 是 array，每個 item 必須包含 category 和 items。
+4. category 是生活類別，例如：保養、家務、社交、工作、出門、情緒整理、健康、休息、其他。
+5. items 是 array，列出具體做了什麼。
+6. 如果我說「刮痧按摩」，category 應該是「保養」，items 放「刮痧按摩」。
+7. 不要過度分類，但也不要全部塞進其他。
+8. 若我沒有給日期，使用今天日期。
+
+範例輸出：
+{"date":"2026-06-07","other":[{"category":"保養","items":["刮痧按摩"]},{"category":"家務","items":["整理房間","洗衣服"]}]}</textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="sc">
+    <div class="sc-head" data-acc="accSync">
+      <h2>📥 Data Sync｜Food / Workout 匯入</h2>
+      <span class="acc-arr">›</span>
+    </div>
+    <div class="acc-body" id="accSync">
+      <p>這裡只負責貼上 JSON 與匯入資料；同步後的結果會顯示在今日頁的「今日摘要」收合區。</p>
+      <div class="sync-split">
+        <div class="sync-card">
+          <h3>🍽 Food JSON</h3>
+          <textarea class="sync-ta" id="foodSyncJson" placeholder='貼上 Food OS 匯出的今日 JSON，例如 {"date":"2026-06-07","food":[...]}'></textarea>
+          <div class="btn-row" style="margin-top:8px">
+            <button class="ghost" id="importFoodSync">匯入 Food Summary</button>
+            <button class="ghost" id="clearFoodSync">清空</button>
+          </div>
+          <div class="sync-msg" id="foodSyncMsg"></div>
+        </div>
+        <div class="sync-card">
+          <h3>🏋️ Workout JSON</h3>
+          <textarea class="sync-ta" id="workoutSyncJson" placeholder='貼上 Workout OS 匯出的今日 JSON，例如 {"date":"2026-06-07","workout":"臀腿C + Core A","exercises":[...]}'></textarea>
+          <div class="btn-row" style="margin-top:8px">
+            <button class="ghost" id="importWorkoutSync">匯入 Workout Summary</button>
+            <button class="ghost" id="clearWorkoutSync">清空</button>
+          </div>
+          <div class="sync-msg" id="workoutSyncMsg"></div>
+        </div>
+        <div class="sync-card">
+          <h3>📚 Learning JSON</h3>
+          <textarea class="sync-ta" id="learningSyncJson" placeholder='貼上 AI 產生的 Learning JSON，例如 {"date":"2026-06-07","learning":[{"category":"泰文","items":["Ch2 課文內容","Shadowing 20 mins"]}]}'></textarea>
+          <div class="btn-row" style="margin-top:8px">
+            <button class="ghost" id="importLearningSync">匯入 Learning Summary</button>
+            <button class="ghost" id="clearLearningSync">清空</button>
+          </div>
+          <div class="sync-msg" id="learningSyncMsg"></div>
+        </div>
+        <div class="sync-card">
+          <h3>🧩 Other JSON</h3>
+          <textarea class="sync-ta" id="otherSyncJson" placeholder='貼上 AI 產生的 Other JSON，例如 {"date":"2026-06-07","other":[{"category":"保養","items":["刮痧按摩"]}]}'></textarea>
+          <div class="btn-row" style="margin-top:8px">
+            <button class="ghost" id="importOtherSync">匯入 Other Summary</button>
+            <button class="ghost" id="clearOtherSync">清空</button>
+          </div>
+          <div class="sync-msg" id="otherSyncMsg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sc">
     <div class="sc-head" data-acc="accBackup">
       <h2>📦 資料備份</h2>
       <span class="acc-arr">›</span>
@@ -499,7 +696,7 @@ const DEFAULTS = {
 };
 
 /* ═══ STORAGE ═══ */
-const KEY = "life_v5";
+const KEY = "life_summary_v233";
 let DATA = JSON.parse(JSON.stringify(DEFAULTS));
 function save(){ try{localStorage.setItem(KEY,JSON.stringify(DATA));}catch(e){} }
 function load(){
@@ -537,11 +734,18 @@ let activeLearnTab=null;
 /* ═══ ENTRY ═══ */
 function E(){
   if(!DATA.entries[cur])DATA.entries[cur]={
-    quote:"",mood:[],exercise:{label:"",status:null,note:""},
-    food:{rating:null,note:""},learning:[],
-    work:{win:"",flow:null},social:"",wins:[],dump:""
+    quote:"",mood:[],dailyState:{energy:null,fullness:null,mood:null,rhythm:null,note:""},
+    food:{rating:null,note:""},foodSummary:null,
+    exercise:{label:"",status:null,note:""},workoutSummary:null,
+    learningSummary:null,otherSummary:null,
+    learning:[],work:{win:"",flow:null},social:"",wins:[],dump:""
   };
   const e=DATA.entries[cur];
+  if(!e.dailyState)e.dailyState={energy:null,fullness:null,mood:null,rhythm:null,note:""};
+  if(!e.foodSummary)e.foodSummary=null;
+  if(!e.workoutSummary)e.workoutSummary=null;
+  if(!e.learningSummary)e.learningSummary=null;
+  if(!e.otherSummary)e.otherSummary=null;
   if(!Array.isArray(e.learning))
     e.learning=(e.learning&&e.learning.topics?e.learning.topics.map(t=>({topic:t,note:""})):[]);
   if(!e.exercise||typeof e.exercise!=="object")e.exercise={label:"",status:null,note:""};
@@ -574,7 +778,8 @@ function updateTileHints(){
 
 /* ═══ RENDER PIECES ═══ */
 function renderMoodRow(){
-  document.getElementById("moodRow").innerHTML=(DATA.moods||[]).map(m=>
+  const row=document.getElementById("moodRow"); if(!row)return;
+  row.innerHTML=(DATA.moods||[]).map(m=>
     `<button class="mood-btn${E().mood.includes(m.l)?" sel":""}" data-mood="${esc(m.l)}" title="${esc(m.l)}">${esc(m.e)}</button>`
   ).join("");
 }
@@ -584,6 +789,7 @@ function updateMoodText(){
   else el.style.display="none";
 }
 function renderExPicker(){
+  if(!document.getElementById('exChips'))return;
   const e=E();
   document.getElementById("exChips").innerHTML=(DATA.exPresets||[]).map(p=>
     `<button class="chip${e.exercise.label===p?" sel":""}" data-ex="${esc(p)}">${esc(p)}</button>`
@@ -593,11 +799,13 @@ function renderExPicker(){
   const en=document.getElementById("exNote");en.value=e.exercise.note||"";autoH(en);
 }
 function renderFoodPicker(){
+  if(!document.getElementById('foodStatus'))return;
   const e=E();
   document.querySelectorAll('#foodStatus .chip').forEach(b=>b.classList.toggle('sel',b.dataset.v===e.food.rating));
   document.getElementById("foodNote").value=e.food.note;
 }
 function renderLearnPicker(){
+  if(!document.getElementById('learnChips'))return;
   const e=E();
   const sel=e.learning.map(en=>en.topic);
   document.getElementById("learnChips").innerHTML=(DATA.learnTopics||[]).map(t=>
@@ -617,6 +825,7 @@ function renderLearnPicker(){
   document.querySelectorAll('#learnTabContent .inline-ta').forEach(autoH);
 }
 function updateQV(){
+  if(!document.getElementById('qExVal'))return;
   const e=E();
   const ev=document.getElementById("qExVal"),et=ev.closest('.ql-tile');
   const ep=[e.exercise.label,{done:"✅",partial:"🌓",rest:"😴"}[e.exercise.status]].filter(Boolean);
@@ -639,6 +848,94 @@ function renderFlowChips(){
   ).join("");
 }
 
+
+function setStateUI(){
+  const s=E().dailyState||{};
+  const el=document.getElementById("stateRhythm");
+  if(el){
+    el.querySelectorAll(".state-btn").forEach(b=>b.classList.toggle("sel", b.dataset.v===s.rhythm));
+  }
+}
+function renderCategorySummary(targetEl, summary, emptyText){
+  if(!summary || !(summary.items||[]).length){
+    targetEl.innerHTML=`<div class="summary-empty">${emptyText}</div>`;
+    return;
+  }
+  targetEl.innerHTML=`<div class="summary-category-grid">`+(summary.items||[]).map(g=>`
+    <div class="summary-category-card">
+      <div class="cat">${esc(g.category||"其他")}</div>
+      <div class="desc">${(g.items||[]).map(x=>`・${esc(x)}`).join("<br>")}</div>
+    </div>`).join("")+`</div>`;
+}
+function renderSummaryViews(){
+  const e=E();
+  const food=e.foodSummary;
+  if(document.getElementById("foodSummaryView")){
+    if(food){
+      const n=food.nutrition||{};
+      const metrics=["calories","protein","carbs","fat"].map(k=>{
+        const label={calories:"熱量 kcal",protein:"蛋白質 g",carbs:"碳水 g",fat:"脂肪 g"}[k];
+        const val=n[k]!==undefined && n[k]!==null && n[k]!=="" ? Math.round(Number(n[k])*10)/10 : "—";
+        return `<div class="summary-box"><div class="v">${esc(val)}</div><div class="l">${label}</div></div>`;
+      }).join("");
+      const items=(food.items||[]).map(i=>`<li><span>${esc(i.name||"未命名")}</span><span>${esc(i.amount||"")}</span></li>`).join("");
+      foodSummaryView.innerHTML=`<div class="summary-grid">${metrics}</div>${items?`<ul class="summary-list">${items}</ul>`:"<div class='summary-empty'>已匯入，但沒有食物明細。</div>"}`;
+    }else{
+      foodSummaryView.innerHTML=`<div class="summary-empty">尚未同步 Food JSON。</div>`;
+    }
+  }
+
+  const w=e.workoutSummary;
+  if(document.getElementById("workoutSummaryView")){
+    if(w){
+      const names=(w.exercises||[]).map(x=>`<li><span>${esc(x.name||"未命名")}</span><span>${esc([x.sets?x.sets+"組":"",x.reps||"",x.weight?x.weight+"kg":""].filter(Boolean).join(" / "))}</span></li>`).join("");
+      workoutSummaryView.innerHTML=`<div class="summary-box"><div class="v">${esc(w.workout||"Workout")}</div><div class="l">今日課表</div></div>${names?`<ul class="summary-list">${names}</ul>`:"<div class='summary-empty'>已匯入，但沒有動作明細。</div>"}`;
+    }else{
+      workoutSummaryView.innerHTML=`<div class="summary-empty">尚未同步 Workout JSON。</div>`;
+    }
+  }
+
+  if(document.getElementById("learningSummaryView"))
+    renderCategorySummary(learningSummaryView,e.learningSummary,"尚未同步 Learning JSON。");
+  if(document.getElementById("otherSummaryView"))
+    renderCategorySummary(otherSummaryView,e.otherSummary,"尚未同步 Other JSON。");
+}
+function normalizeCategorySummary(raw,key){
+  const obj=Array.isArray(raw)?{date:cur,[key]:raw}:raw;
+  const arr=obj[key]||obj.items||[];
+  return {date:obj.date||cur,items:arr.map(g=>({
+    category:g.category||g.type||g.title||"其他",
+    items:Array.isArray(g.items)?g.items:(g.item?[g.item]:g.desc?[g.desc]:[])
+  }))};
+}
+function normalizeFoodSync(raw){
+  const obj=Array.isArray(raw)?{date:cur,food:raw}:raw;
+  const arr=obj.food||obj.items||obj.entries||obj.logs||[];
+  const nutrition={calories:0,protein:0,carbs:0,fat:0};
+  let hasNutrition=false;
+  const items=arr.map(it=>{
+    const name=it.food||it.custom||it.name||it.item||"未命名";
+    const amount=it.gram?`${it.gram}g`:it.ml?`${it.ml}ml`:it.qty?`${it.qty}份`:"";
+    const n=it.nutrition || (it.custom&&typeof it.custom==="object"?it.custom.nutrition:null);
+    if(n){
+      ["calories","protein","carbs","fat"].forEach(k=>{if(n[k]!=null){nutrition[k]+=Number(n[k])||0;hasNutrition=true;}});
+    }
+    return {name,amount,estimated:!!it.estimated};
+  });
+  return {date:obj.date||cur,items,nutrition:hasNutrition?nutrition:{},source:"Food OS"};
+}
+function normalizeWorkoutSync(raw){
+  const obj=Array.isArray(raw)?{date:cur,workout:"Workout",exercises:raw}:raw;
+  const arr=obj.exercises||obj.items||obj.logs||[];
+  return {date:obj.date||cur,workout:obj.workout||obj.name||"Workout",exercises:arr.map(x=>({
+    name:x.name||x.exercise||x.move||"未命名",
+    weight:x.weight??"",
+    sets:x.sets??"",
+    reps:x.reps??"",
+    status:x.status||""
+  })),source:"Workout OS"};
+}
+
 function renderToday(){
   const d=pYmd(cur);
   const ts=ymd(new Date()),ys=ymd(new Date(new Date().setDate(new Date().getDate()-1)));
@@ -647,7 +944,7 @@ function renderToday(){
   document.getElementById("dayLabel").innerHTML=`${badge}${MON[d.getMonth()]}・${WDAY[d.getDay()]}曜日`;
   const e=E();
   const qi=document.getElementById("quoteInput");qi.value=e.quote;autoH(qi);
-  renderMoodRow();updateMoodText();
+  renderMoodRow();updateMoodText();setStateUI();renderSummaryViews();
   renderExPicker();renderFoodPicker();renderLearnPicker();renderFlowChips();updateQV();
   document.getElementById("winList").innerHTML=
     e.wins.map((w,i)=>`<li><span>${esc(w)}</span><button class="x" data-wi="${i}">✕</button></li>`).join("")||"";
@@ -660,11 +957,16 @@ function renderToday(){
 function score(k){
   const e=DATA.entries[k];if(!e)return 0;let s=0;
   if(e.quote&&e.quote.trim())s++;
+  if(e.dailyState&&e.dailyState.rhythm)s++;
   if(e.mood&&e.mood.length)s++;
   if(e.exercise){
     if(e.exercise.status==="done")s+=2;else if(e.exercise.status==="partial")s++;
     if(e.exercise.label)s++;if(e.exercise.note&&e.exercise.note.trim())s++;
   }
+  if(e.foodSummary)s++;
+  if(e.workoutSummary)s++;
+  if(e.learningSummary)s++;
+  if(e.otherSummary)s++;
   if(e.food&&e.food.rating)s+=(e.food.rating==="good"?2:1);
   if(Array.isArray(e.learning)&&e.learning.length){
     s++;if(e.learning.some(en=>en.note&&en.note.trim()))s++;
@@ -769,7 +1071,7 @@ const moodEditor  = makeEditor('moodList',  'moods',       true);
 const flowEditor  = makeEditor('flowList',  'flowStates',  false);
 
 function renderSettings(){
-  exEditor.render();learnEditor.render();moodEditor.render();flowEditor.render();
+  exEditor.render();learnEditor.render();moodEditor.render();flowEditor.render();renderSummaryViews();
 }
 
 /* ═══ EVENTS ═══ */
@@ -785,37 +1087,37 @@ document.getElementById("moodRow").addEventListener("click",e=>{
   save();renderMoodRow();updateMoodText();
 });
 
-document.querySelectorAll('.ql-tile').forEach(tile=>tile.onclick=()=>togglePicker(tile.dataset.picker));
+if(document.querySelector(".ql-tile")) document.querySelectorAll('.ql-tile').forEach(tile=>tile.onclick=()=>togglePicker(tile.dataset.picker));
 
-document.getElementById("exChips").addEventListener("click",e=>{
+if(document.getElementById("exChips")) document.getElementById("exChips").addEventListener("click",e=>{
   const b=e.target.closest("[data-ex]");if(!b)return;
   E().exercise.label=E().exercise.label===b.dataset.ex?"":b.dataset.ex;
   document.getElementById("exIn").value="";save();renderExPicker();updateQV();
 });
-document.getElementById("exIn").addEventListener("input",e=>{E().exercise.label=e.target.value;save();updateQV();});
-document.getElementById("exStatus").addEventListener("click",e=>{
+if(document.getElementById("exIn")) document.getElementById("exIn").addEventListener("input",e=>{E().exercise.label=e.target.value;save();updateQV();});
+if(document.getElementById("exStatus")) document.getElementById("exStatus").addEventListener("click",e=>{
   const b=e.target.closest("[data-v]");if(!b)return;
   E().exercise.status=E().exercise.status===b.dataset.v?null:b.dataset.v;save();renderExPicker();updateQV();
 });
-document.getElementById("exNote").addEventListener("input",e=>{E().exercise.note=e.target.value;save();autoH(e.target);});
+if(document.getElementById("exNote")) document.getElementById("exNote").addEventListener("input",e=>{E().exercise.note=e.target.value;save();autoH(e.target);});
 
-document.getElementById("foodStatus").addEventListener("click",e=>{
+if(document.getElementById("foodStatus")) document.getElementById("foodStatus").addEventListener("click",e=>{
   const b=e.target.closest("[data-v]");if(!b)return;
   E().food.rating=E().food.rating===b.dataset.v?null:b.dataset.v;save();renderFoodPicker();updateQV();
 });
-document.getElementById("foodNote").addEventListener("input",e=>{E().food.note=e.target.value;save();});
+if(document.getElementById("foodNote")) document.getElementById("foodNote").addEventListener("input",e=>{E().food.note=e.target.value;save();});
 
-document.getElementById("learnChips").addEventListener("click",e=>{
+if(document.getElementById("learnChips")) document.getElementById("learnChips").addEventListener("click",e=>{
   const b=e.target.closest("[data-learn]");if(!b)return;
   const t=b.dataset.learn,arr=E().learning,i=arr.findIndex(en=>en.topic===t);
   if(i>=0)arr.splice(i,1);else arr.push({topic:t,note:""});
   save();renderLearnPicker();updateQV();
 });
-document.getElementById("learnTabs").addEventListener("click",e=>{
+if(document.getElementById("learnTabs")) document.getElementById("learnTabs").addEventListener("click",e=>{
   const b=e.target.closest("[data-ltab]");if(!b)return;
   activeLearnTab=b.dataset.ltab;renderLearnPicker();
 });
-document.getElementById("learnTabContent").addEventListener("input",e=>{
+if(document.getElementById("learnTabContent")) document.getElementById("learnTabContent").addEventListener("input",e=>{
   const ta=e.target.closest("[data-li]");if(!ta)return;
   E().learning[+ta.dataset.li].note=ta.value;save();autoH(ta);
 });
@@ -840,6 +1142,9 @@ document.getElementById("socialNote").addEventListener("input",e=>{E().social=e.
 document.getElementById("moreToggle").onclick=function(){
   this.classList.toggle("open");document.getElementById("moreBody").classList.toggle("open");
 };
+document.getElementById("summaryToggle").onclick=function(){
+  this.classList.toggle("open");document.getElementById("summaryBody").classList.toggle("open");
+};
 
 // nav tabs
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
@@ -860,6 +1165,58 @@ document.getElementById("streak").addEventListener("click",e=>{
   document.getElementById("today").classList.add('on');
   closePickers();renderToday();
 });
+
+
+// daily rhythm state
+document.querySelectorAll("#stateRhythm .state-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const s=E().dailyState;
+    s.rhythm=s.rhythm===btn.dataset.v?null:btn.dataset.v;
+    save();setStateUI();renderReview();
+  });
+});
+
+// Food / Workout data sync
+document.getElementById("importFoodSync").onclick=()=>{
+  const text=document.getElementById("foodSyncJson").value.trim(); if(!text)return;
+  try{
+    const parsed=JSON.parse(text); const s=normalizeFoodSync(parsed);
+    if(s.date)cur=s.date; E().foodSummary=s; save(); renderToday();renderSummaryViews();
+    document.getElementById("foodSyncMsg").textContent=`已同步 ${s.items.length} 筆飲食資料`;
+  }catch(e){document.getElementById("foodSyncMsg").textContent="JSON 格式錯誤";}
+};
+document.getElementById("clearFoodSync").onclick=()=>{document.getElementById("foodSyncJson").value="";document.getElementById("foodSyncMsg").textContent="";};
+document.getElementById("importWorkoutSync").onclick=()=>{
+  const text=document.getElementById("workoutSyncJson").value.trim(); if(!text)return;
+  try{
+    const parsed=JSON.parse(text); const s=normalizeWorkoutSync(parsed);
+    if(s.date)cur=s.date; E().workoutSummary=s; save(); renderToday();renderSummaryViews();
+    document.getElementById("workoutSyncMsg").textContent=`已同步 ${s.exercises.length} 個運動動作`;
+  }catch(e){document.getElementById("workoutSyncMsg").textContent="JSON 格式錯誤";}
+};
+document.getElementById("clearWorkoutSync").onclick=()=>{document.getElementById("workoutSyncJson").value="";document.getElementById("workoutSyncMsg").textContent="";};
+document.getElementById("importLearningSync").onclick=()=>{
+  const text=document.getElementById("learningSyncJson").value.trim(); if(!text)return;
+  try{
+    const parsed=JSON.parse(text); const s=normalizeCategorySummary(parsed,"learning");
+    if(s.date)cur=s.date; E().learningSummary=s; 
+    E().learning=(s.items||[]).map(g=>({topic:g.category,note:(g.items||[]).join("；")}));
+    save(); renderToday();renderSummaryViews();
+    document.getElementById("learningSyncMsg").textContent=`已同步 ${s.items.length} 個學習分類`;
+  }catch(e){document.getElementById("learningSyncMsg").textContent="JSON 格式錯誤";}
+};
+document.getElementById("clearLearningSync").onclick=()=>{document.getElementById("learningSyncJson").value="";document.getElementById("learningSyncMsg").textContent="";};
+document.getElementById("importOtherSync").onclick=()=>{
+  const text=document.getElementById("otherSyncJson").value.trim(); if(!text)return;
+  try{
+    const parsed=JSON.parse(text); const s=normalizeCategorySummary(parsed,"other");
+    if(s.date)cur=s.date; E().otherSummary=s; save(); renderToday();renderSummaryViews();
+    document.getElementById("otherSyncMsg").textContent=`已同步 ${s.items.length} 個其他分類`;
+  }catch(e){document.getElementById("otherSyncMsg").textContent="JSON 格式錯誤";}
+};
+document.getElementById("clearOtherSync").onclick=()=>{document.getElementById("otherSyncJson").value="";document.getElementById("otherSyncMsg").textContent="";};
+
+
 
 // settings accordions
 document.querySelectorAll('.sc-head').forEach(h=>h.onclick=()=>{
