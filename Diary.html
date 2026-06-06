@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日節奏 · 生活儀表板</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Noto+Sans+TC:wght@400;500&family=Noto+Serif+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4EDE0;--paper:#FFFDF8;--ink:#2C2420;--muted:#9A8C7C;
+  --faint:#EDE5D4;--line:#E2D8C8;--sage:#648B57;--sage-s:#DDE9D3;
+  --clay:#C97A5C;--clay-s:#F5E2DA;--sand:#D4A843;
+  --shadow:0 10px 60px -15px rgba(50,30,10,.16);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Noto Sans TC",sans-serif;background:var(--bg);color:var(--ink);
+  line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;
+  background-image:radial-gradient(ellipse at 15% 0%,#fff8ea 0,transparent 55%),
+    radial-gradient(ellipse at 85% 5%,#e8f0e0 0,transparent 50%)}
+.wrap{max-width:660px;margin:0 auto;padding:30px 20px 90px}
+
+.kicker{font-family:"Fraunces",serif;color:var(--clay);font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase}
+h1{font-family:"Noto Serif TC",serif;font-weight:700;font-size:1.6rem;letter-spacing:.3px;margin-top:4px}
+.sub{color:var(--muted);font-size:.86rem;margin-top:4px}
+
+nav{display:flex;gap:5px;margin:22px 0 24px;background:var(--paper);padding:5px;border-radius:14px;
+  border:1px solid var(--line);position:sticky;top:0;z-index:20;
+  box-shadow:0 2px 20px -8px rgba(50,30,10,.12)}
+nav button{flex:1;border:none;background:transparent;font-family:inherit;font-size:.86rem;
+  color:var(--muted);padding:9px 6px;border-radius:10px;cursor:pointer;white-space:nowrap;transition:.2s;font-weight:500}
+nav button.on{background:var(--sage);color:#fff;box-shadow:0 4px 12px -5px var(--sage)}
+
+.panel{display:none;animation:fade .28s ease}.panel.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+.paper{background:var(--paper);border:1px solid var(--line);border-radius:22px;
+  box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
+
+/* date */
+.date-sec{padding:24px 26px 20px;display:flex;align-items:flex-end;justify-content:space-between;
+  border-bottom:1.5px solid var(--line);background:linear-gradient(135deg,#fffdf5,#f0f7ea)}
+.date-num{font-family:"Fraunces",serif;font-size:3rem;line-height:1;color:var(--clay);
+  font-weight:400;letter-spacing:-1px}
+.date-label{font-family:"Fraunces",serif;font-size:.88rem;color:var(--muted);letter-spacing:.3px;margin-top:5px}
+.date-today{display:inline-block;background:var(--clay);color:#fff;font-size:.65rem;
+  letter-spacing:.8px;text-transform:uppercase;padding:2px 8px;border-radius:99px;
+  margin-right:6px;font-family:"Fraunces",serif;vertical-align:middle}
+.date-nav{display:flex;gap:6px;align-self:center}
+.date-nav button{border:1px solid var(--line);background:transparent;border-radius:9px;
+  width:34px;height:34px;cursor:pointer;font-size:1rem;color:var(--muted);transition:.15s}
+.date-nav button:hover{border-color:var(--clay);color:var(--clay)}
+
+/* sections */
+.sec{padding:20px 26px;border-bottom:1px solid var(--line)}
+.sec:last-child{border-bottom:none}
+.sec-lbl{font-family:"Fraunces",serif;font-size:.68rem;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+
+.journal{width:100%;background:transparent;border:none;font-family:"Noto Serif TC",serif;
+  font-size:1rem;color:var(--ink);line-height:1.8;resize:none;min-height:72px}
+.journal:focus{outline:none}
+.journal::placeholder{color:var(--muted);font-family:"Noto Sans TC",sans-serif;font-size:.9rem;font-style:italic}
+
+/* mood */
+.mood-row{display:flex;gap:9px;flex-wrap:wrap}
+.mood-btn{width:44px;height:44px;border-radius:50%;border:2px solid transparent;background:var(--faint);
+  font-size:1.35rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.18s}
+.mood-btn:hover{background:var(--sage-s);transform:scale(1.05)}
+.mood-btn.sel{background:var(--sage-s);border-color:var(--sage);transform:scale(1.1)}
+.mood-selected{display:none;margin-top:10px;font-family:"Fraunces",serif;font-size:.84rem;
+  color:var(--sage);letter-spacing:.2px}
+
+/* tiles */
+.ql-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ql-tile{background:var(--faint);border:1.5px solid transparent;border-radius:14px;
+  padding:13px 10px 10px;cursor:pointer;transition:.2s;text-align:center;user-select:none}
+.ql-tile:hover{border-color:var(--line);background:#ede6d8;transform:translateY(-1px)}
+.ql-tile.active{border-color:var(--sage);background:var(--sage-s)}
+.ql-tile.picker-open{border-color:var(--clay);background:var(--clay-s)}
+.ql-tile .ti{font-size:1.35rem;display:block;margin-bottom:3px}
+.ql-tile .tl{font-size:.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-family:"Fraunces",serif}
+.ql-tile .tv{font-size:.78rem;color:var(--ink);margin-top:4px;font-weight:500;min-height:17px;line-height:1.3}
+.ql-tile .tv.empty{color:var(--muted);font-weight:400}
+.ql-tile .tile-hint{font-size:.6rem;color:var(--muted);font-family:"Fraunces",serif;
+  letter-spacing:.5px;text-transform:uppercase;margin-top:5px;transition:.15s}
+.ql-tile.picker-open .tile-hint{color:var(--clay)}
+.ql-tile.active:not(.picker-open) .tile-hint{color:var(--sage)}
+
+/* picker */
+.picker{display:none;padding:16px 26px 18px;border-bottom:1px solid var(--line);
+  background:#faf6ee;animation:fade .2s ease}
+.picker.open{display:block}
+.plbl{font-size:.7rem;font-family:"Fraunces",serif;letter-spacing:1px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:block}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{background:var(--paper);color:var(--ink);border:1px solid var(--line);padding:5px 12px;
+  border-radius:99px;font-family:inherit;font-size:.8rem;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--sage)}
+.chip.sel{background:var(--sage);color:#fff;border-color:var(--sage)}
+
+.inline-inp{width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);
+  border-radius:0;padding:6px 0;font-family:inherit;font-size:.88rem;color:var(--ink)}
+.inline-inp:focus{outline:none;border-bottom-color:var(--sage)}
+.inline-inp::placeholder{color:var(--muted)}
+.inline-ta{width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);
+  border-radius:0;padding:5px 0 6px;font-family:inherit;font-size:.88rem;color:var(--ink);
+  resize:none;min-height:44px;line-height:1.65}
+.inline-ta:focus{outline:none;border-bottom-color:var(--sage)}
+.inline-ta::placeholder{color:var(--muted);font-style:italic}
+
+/* learn tabs */
+.learn-tabs{display:none;flex-wrap:wrap;margin-top:14px;border-bottom:1.5px solid var(--line)}
+.ltab{border:none;background:transparent;font-family:inherit;font-size:.84rem;color:var(--muted);
+  padding:7px 13px 9px;cursor:pointer;border-bottom:2.5px solid transparent;
+  margin-bottom:-1.5px;transition:.15s}
+.ltab:hover{color:var(--ink)}
+.ltab.active{color:var(--sage);border-bottom-color:var(--sage);font-weight:500}
+.learn-tab-content{display:none;padding-top:10px}
+
+/* wins */
+.win-add-row{display:flex;gap:8px;margin-bottom:10px}
+.win-add-row input{flex:1;background:transparent;border:none;border-bottom:1px solid var(--line);
+  border-radius:0;padding:5px 0;font-family:"Noto Serif TC",serif;font-size:.9rem;color:var(--ink)}
+.win-add-row input:focus{outline:none;border-bottom-color:var(--sage)}
+.win-add-row input::placeholder{color:var(--muted);font-style:italic;font-family:"Noto Sans TC",sans-serif}
+.win-add-row button{background:var(--sage);color:#fff;border:none;border-radius:8px;
+  padding:5px 13px;font-family:inherit;font-size:.84rem;cursor:pointer;flex-shrink:0}
+ul.wins{list-style:none}
+ul.wins li{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:.9rem}
+ul.wins li:last-child{border-bottom:none}
+ul.wins li::before{content:"✦";color:var(--sand);font-size:.65rem;flex-shrink:0}
+ul.wins li .x{margin-left:auto;color:var(--muted);cursor:pointer;border:none;background:none;font-size:.9rem}
+ul.wins li .x:hover{color:var(--clay)}
+
+.dump{width:100%;background:transparent;border:none;font-family:"Noto Sans TC",sans-serif;
+  font-size:.88rem;color:var(--ink);line-height:1.75;resize:none;min-height:70px}
+.dump:focus{outline:none}
+.dump::placeholder{color:var(--muted);font-style:italic}
+
+.more-btn{display:flex;align-items:center;gap:7px;width:100%;padding:14px 26px;background:none;
+  border:none;border-bottom:1px solid var(--line);font-family:inherit;font-size:.84rem;
+  color:var(--muted);cursor:pointer;text-align:left}
+.more-btn:hover{color:var(--clay)}
+.more-btn .arr{display:inline-block;transition:transform .2s}
+.more-btn.open .arr{transform:rotate(90deg)}
+.more-body{display:none}.more-body.open{display:block}
+
+/* review */
+.rc{background:var(--paper);border:1px solid var(--line);border-radius:18px;
+  padding:20px;margin-bottom:12px;box-shadow:var(--shadow)}
+.rc h2{font-family:"Noto Serif TC",serif;font-size:1rem;margin-bottom:5px;display:flex;align-items:center;gap:7px}
+.rc .hint{font-size:.8rem;color:var(--muted);margin-bottom:10px}
+.streak{display:flex;flex-wrap:wrap;gap:5px}
+.dot{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:.64rem;background:#dfd5c4;color:#b0a08a;cursor:pointer;transition:.15s}
+.dot:hover{transform:scale(1.15);box-shadow:0 2px 8px rgba(0,0,0,.12);z-index:1}
+.dot.great{background:var(--sage);color:#fff}
+.dot.good{background:var(--sand);color:#2a1a00}
+.dot.logged{background:#c0b4a4;color:#6a5848}
+.stats{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:12px}
+.stat-b{flex:1;min-width:100px;background:var(--paper);border:1px solid var(--line);
+  border-radius:13px;padding:13px 14px;box-shadow:var(--shadow)}
+.stat-b .num{font-family:"Fraunces",serif;font-size:1.8rem;color:var(--sage);line-height:1}
+.stat-b .lab{font-size:.74rem;color:var(--muted);margin-top:2px}
+.brow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;
+  border-bottom:1px dashed var(--line);font-size:.86rem}
+.brow:last-child{border-bottom:none}
+.bfill{height:4px;border-radius:99px;background:var(--faint);margin-top:2px;overflow:hidden}
+.bfill span{display:block;height:100%;background:var(--sage);border-radius:99px}
+
+/* settings */
+.sc{background:var(--paper);border:1px solid var(--line);border-radius:18px;
+  padding:20px;margin-bottom:12px;box-shadow:var(--shadow)}
+.sc h2{font-family:"Noto Serif TC",serif;font-size:1rem;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.sc p{font-size:.84rem;color:var(--muted);margin-bottom:10px}
+textarea.set-ta{width:100%;border:1px solid var(--line);border-radius:11px;padding:10px 12px;
+  font-family:inherit;font-size:.9rem;color:var(--ink);background:#fff;resize:vertical;min-height:80px}
+textarea.set-ta:focus{outline:none;border-color:var(--sage)}
+
+/* accordion */
+.sc-head{display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;user-select:none;padding:0}
+.sc-head h2{margin-bottom:0;pointer-events:none}
+.sc-head .acc-arr{font-size:.88rem;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.sc-head.open .acc-arr{transform:rotate(90deg)}
+.acc-body{display:none;padding-top:14px}
+.acc-body.open{display:block}
+
+/* preset sub-sections */
+.preset-sec{margin-bottom:18px}
+.preset-sec:last-child{margin-bottom:0}
+.preset-lbl{font-size:.72rem;font-family:"Fraunces",serif;letter-spacing:.8px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:block}
+
+/* add row */
+.add-row{display:flex;gap:8px;margin-bottom:10px}
+.add-row input{flex:1;border:1px solid var(--line);border-radius:9px;padding:7px 11px;
+  font-family:inherit;font-size:.88rem;color:var(--ink);background:#fff;min-width:0}
+.add-row input:focus{outline:none;border-color:var(--sage)}
+.add-row input.emoji-inp{flex:0;width:52px;text-align:center;font-size:1.1rem;padding:7px 6px}
+.add-row button{background:var(--sage);color:#fff;border:none;border-radius:9px;
+  padding:7px 14px;font-family:inherit;font-size:.84rem;cursor:pointer;flex-shrink:0;white-space:nowrap}
+
+/* topic list */
+.tl-row{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.tl-item{display:flex;align-items:center;gap:8px;padding:9px 13px;
+  background:#fff;border-bottom:1px solid var(--line)}
+.tl-item:last-child{border-bottom:none}
+.tl-item.editing{background:#fafaf8}
+.tl-name{flex:1;font-size:.88rem}
+.tl-acts{display:flex;gap:5px;flex-shrink:0}
+.tl-act{border:1px solid var(--line);background:transparent;border-radius:7px;
+  width:28px;height:28px;cursor:pointer;font-size:.78rem;display:flex;
+  align-items:center;justify-content:center;transition:.15s;color:var(--muted)}
+.tl-act:hover{border-color:var(--clay);color:var(--clay)}
+.tl-act.save:hover{border-color:var(--sage);color:var(--sage)}
+.tl-e{border:none;border-bottom:1px solid var(--sage);background:transparent;
+  padding:2px 2px;font-family:inherit;font-size:.88rem;color:var(--ink)}
+.tl-e:focus{outline:none}
+.tl-e.emoji-e{width:38px;text-align:center;font-size:1rem}
+.tl-e.label-e{flex:1;min-width:0}
+.tl-empty{font-size:.84rem;color:var(--muted);font-style:italic;padding:10px 13px;
+  background:#fff;border:1px solid var(--line);border-radius:12px}
+
+/* misc */
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.ghost{background:none;border:1px solid var(--line);color:var(--muted);border-radius:9px;
+  padding:7px 13px;font-family:inherit;cursor:pointer;font-size:.82rem;transition:.15s}
+.ghost:hover{border-color:var(--clay);color:var(--clay)}
+.ghost.danger{border-color:#e0b0a0;color:var(--clay)}
+.import-area{width:100%;border:1px solid var(--line);border-radius:11px;padding:10px 12px;
+  font-family:monospace;font-size:.8rem;color:var(--muted);background:#fff;
+  resize:vertical;min-height:80px;margin-top:10px}
+.import-area:focus{outline:none;border-color:var(--sage)}
+.saved{font-size:.74rem;color:var(--sage);opacity:0;transition:.3s;margin-left:7px}
+.saved.show{opacity:1}
+.empty-hint{font-size:.84rem;color:var(--muted);font-style:italic}
+
+footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:28px;line-height:2}
+
+@media(max-width:480px){
+  .date-num{font-size:2.4rem}
+  .sec,.date-sec{padding:16px 18px}
+  .more-btn,.picker{padding-left:18px;padding-right:18px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="kicker">daily rhythm · life dashboard</div>
+  <h1>每日節奏</h1>
+  <div class="sub">記錄，不評分。有在記，就已經在做了。</div>
+</header>
+
+<nav>
+  <button class="on" data-tab="today">今日</button>
+  <button data-tab="review">回顧</button>
+  <button data-tab="set">設定</button>
+</nav>
+
+<!-- TODAY -->
+<section class="panel on" id="today">
+<div class="paper">
+  <div class="date-sec">
+    <div>
+      <div class="date-num" id="dayNum">—</div>
+      <div class="date-label" id="dayLabel">—</div>
+    </div>
+    <div class="date-nav">
+      <button id="prev">‹</button>
+      <button id="next">›</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-lbl">今天怎麼樣</div>
+    <textarea class="journal" id="quoteInput" placeholder="隨手寫——一句話也好。"></textarea>
+  </div>
+
+  <div class="sec">
+    <div class="sec-lbl">心情</div>
+    <div class="mood-row" id="moodRow"></div>
+    <div class="mood-selected" id="moodSelected"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-lbl">今日速記</div>
+    <div class="ql-grid">
+      <div class="ql-tile" data-picker="exPicker">
+        <span class="ti">🏋️</span><span class="tl">運動</span>
+        <div class="tv empty" id="qExVal">—</div>
+        <div class="tile-hint">點選記錄</div>
+      </div>
+      <div class="ql-tile" data-picker="foodPicker">
+        <span class="ti">🍜</span><span class="tl">飲食</span>
+        <div class="tv empty" id="qFoodVal">—</div>
+        <div class="tile-hint">點選記錄</div>
+      </div>
+      <div class="ql-tile" data-picker="learnPicker">
+        <span class="ti">📚</span><span class="tl">學習</span>
+        <div class="tv empty" id="qLearnVal">—</div>
+        <div class="tile-hint">點選記錄</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="picker" id="exPicker">
+    <span class="plbl">項目</span>
+    <div class="chips" id="exChips"></div>
+    <input class="inline-inp" id="exIn" style="margin-top:10px" placeholder="自訂（例如：游泳 45 分鐘）">
+    <span class="plbl" style="margin-top:14px">狀態</span>
+    <div class="chips" id="exStatus">
+      <button class="chip" data-v="done">✅ 完成</button>
+      <button class="chip" data-v="partial">🌓 部分完成</button>
+      <button class="chip" data-v="rest">😴 休息日</button>
+    </div>
+    <span class="plbl" style="margin-top:14px">這次感覺（可不填）</span>
+    <textarea class="inline-ta" id="exNote" placeholder="例如：今天肩膀比較緊，組數完成但強度降低。"></textarea>
+  </div>
+
+  <div class="picker" id="foodPicker">
+    <span class="plbl">今天吃得怎麼樣</span>
+    <div class="chips" id="foodStatus">
+      <button class="chip" data-v="good">😊 吃得好</button>
+      <button class="chip" data-v="ok">😐 普通</button>
+      <button class="chip" data-v="meh">😵 沒吃好</button>
+    </div>
+    <input class="inline-inp" id="foodNote" style="margin-top:12px" placeholder="備注（可不填）">
+  </div>
+
+  <div class="picker" id="learnPicker">
+    <span class="plbl">今天學了什麼</span>
+    <div class="chips" id="learnChips"></div>
+    <div class="learn-tabs" id="learnTabs"></div>
+    <div class="learn-tab-content" id="learnTabContent"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-lbl">今日小成就</div>
+    <div class="win-add-row">
+      <input type="text" id="winIn" placeholder="任何事都算——打卡、完成一件事…">
+      <button id="winAdd">加</button>
+    </div>
+    <ul class="wins" id="winList"></ul>
+  </div>
+
+  <div class="sec">
+    <div class="sec-lbl">Brain Dump</div>
+    <textarea class="dump" id="dumpNote" placeholder="想記什麼都行，不用整理。"></textarea>
+  </div>
+
+  <button class="more-btn" id="moreToggle">
+    <span class="arr">›</span> 更多記錄（工作・人際）
+  </button>
+  <div class="more-body" id="moreBody">
+    <div class="sec">
+      <div class="sec-lbl">工作</div>
+      <input class="inline-inp" id="workWin" placeholder="今天一個小贏">
+      <span class="plbl" style="margin-top:14px">工作狀態</span>
+      <div class="chips" id="flowChips"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-lbl">人際</div>
+      <textarea class="dump" id="socialNote" placeholder="有什麼互動值得記一下？"></textarea>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- REVIEW -->
+<section class="panel" id="review">
+  <div class="rc">
+    <h2>📅 最近 28 天</h2>
+    <div class="hint">
+      <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--sage);margin-right:4px;vertical-align:middle"></span>充實
+      <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--sand);margin:0 4px 0 10px;vertical-align:middle"></span>普通
+      <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#c0b4a4;margin:0 4px 0 10px;vertical-align:middle"></span>有記錄
+      <span style="font-size:.76rem;color:var(--muted);margin-left:10px">· 點格子跳到那天</span>
+    </div>
+    <div class="streak" id="streak" style="margin-top:10px"></div>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div class="rc"><h2>😊 心情分佈</h2><div id="moodBreak" style="margin-top:6px"></div></div>
+  <div class="rc"><h2>📚 學習主題</h2><div id="learnBreak" style="margin-top:6px"></div></div>
+</section>
+
+<!-- SETTINGS -->
+<section class="panel" id="set">
+  <div class="sc">
+    <h2>⚙️ 個人設定</h2>
+    <label style="font-size:.82rem;color:var(--muted);display:block;margin-bottom:6px">目標 / 提醒自己的話</label>
+    <textarea class="set-ta" id="targets" placeholder="例如：這週完成泰文 Day 7，保持每天健身。"></textarea>
+    <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+      <button class="ghost" id="saveTargets">儲存</button>
+      <span class="saved" id="tSaved">✓ 已儲存</span>
+    </div>
+  </div>
+
+  <div class="sc">
+    <div class="sc-head" data-acc="accPresets">
+      <h2>🎛 預設管理</h2>
+      <span class="acc-arr">›</span>
+    </div>
+    <div class="acc-body" id="accPresets">
+      <p>所有選項都可以在這裡新增、改名、刪除——不用改程式碼。</p>
+
+      <div class="preset-sec">
+        <span class="preset-lbl">🏋️ 運動預設</span>
+        <div class="add-row">
+          <input type="text" id="addExIn" placeholder="新項目（例如：跳繩）">
+          <button id="addExBtn">加入</button>
+        </div>
+        <div id="exList"></div>
+      </div>
+
+      <div class="preset-sec">
+        <span class="preset-lbl">📚 學習主題</span>
+        <div class="add-row">
+          <input type="text" id="addLearnIn" placeholder="新主題（例如：日文）">
+          <button id="addLearnBtn">加入</button>
+        </div>
+        <div id="learnList"></div>
+      </div>
+
+      <div class="preset-sec">
+        <span class="preset-lbl">😊 心情選項</span>
+        <div class="add-row">
+          <input type="text" id="addMoodEmoji" class="emoji-inp" placeholder="😊">
+          <input type="text" id="addMoodLabel" placeholder="心情名稱（例如：平靜）">
+          <button id="addMoodBtn">加入</button>
+        </div>
+        <div id="moodList"></div>
+      </div>
+
+      <div class="preset-sec">
+        <span class="preset-lbl">💼 工作狀態</span>
+        <div class="add-row">
+          <input type="text" id="addFlowIn" placeholder="新狀態（例如：高壓但專注）">
+          <button id="addFlowBtn">加入</button>
+        </div>
+        <div id="flowList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sc">
+    <div class="sc-head" data-acc="accBackup">
+      <h2>📦 資料備份</h2>
+      <span class="acc-arr">›</span>
+    </div>
+    <div class="acc-body" id="accBackup">
+      <p>匯出可備份或搬到其他裝置；匯入會覆蓋現有資料。</p>
+      <div class="btn-row">
+        <button class="ghost" id="exportBtn">⬇ 匯出 JSON</button>
+        <button class="ghost" id="importToggle">⬆ 匯入 JSON</button>
+      </div>
+      <div id="importWrap" style="display:none;margin-top:10px">
+        <textarea class="import-area" id="importArea" placeholder="貼上先前匯出的 JSON 內容…"></textarea>
+        <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+          <button class="ghost" id="importConfirm">確認匯入</button>
+          <span class="saved" id="importOK">✓ 匯入成功</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sc">
+    <div class="sc-head" data-acc="accDanger">
+      <h2>🗑 資料管理</h2>
+      <span class="acc-arr">›</span>
+    </div>
+    <div class="acc-body" id="accDanger">
+      <p>清空所有紀錄——無法復原。建議先備份。</p>
+      <button class="ghost danger" id="reset">清空全部紀錄</button>
+    </div>
+  </div>
+</section>
+
+<footer>每日節奏 · 生活儀表板<br>記錄，不評分。</footer>
+</div>
+
+<script>
+/* ═══ DEFAULTS ═══ */
+const DEFAULTS = {
+  entries: {},
+  targets: "",
+  exPresets:   ["臀","腿","肩","背","胸","手臂","腹肌","核心","伸展","面部瑜伽","休息"],
+  learnTopics: ["泰文","英文","商業","AI","程式","閱讀","求職","其他"],
+  moods: [
+    {e:"😁",l:"開心"},{e:"😊",l:"平靜"},{e:"🤩",l:"充實"},{e:"😐",l:"普通"},
+    {e:"😔",l:"低落"},{e:"😰",l:"焦慮"},{e:"😫",l:"疲累"},{e:"🥲",l:"感恩"}
+  ],
+  flowStates: ["很專注","普通","有點分心","完全失焦"]
+};
+
+/* ═══ STORAGE ═══ */
+const KEY = "life_v5";
+let DATA = JSON.parse(JSON.stringify(DEFAULTS));
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(DATA));}catch(e){} }
+function load(){
+  try{
+    const s=localStorage.getItem(KEY);
+    if(!s)return;
+    const saved=JSON.parse(s);
+    // deep merge: keep DEFAULTS keys that saved doesn't have
+    DATA=Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),saved);
+    // migrate from older versions
+    if(saved.customLearnTopics&&!saved.learnTopics)
+      DATA.learnTopics=[...DEFAULTS.learnTopics,...saved.customLearnTopics];
+    if(saved.customExPresets&&!saved.exPresets)
+      DATA.exPresets=[...DEFAULTS.exPresets,...saved.customExPresets];
+  }catch(e){}
+}
+
+/* ═══ HELPERS ═══ */
+// LOCAL time ymd — fixes UTC timezone bug
+function ymd(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function pYmd(s){const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d);}
+function esc(s){return(s+"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function autoH(el){if(!el)return;el.style.height="auto";el.style.height=Math.max(44,el.scrollHeight)+"px";}
+function flash(id){const s=document.getElementById(id);s.classList.add("show");setTimeout(()=>s.classList.remove("show"),1600);}
+
+const WDAY=["日","一","二","三","四","五","六"];
+const MON=["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"];
+
+/* ═══ STATE ═══ */
+let cur=ymd(new Date());
+let activeLearnTab=null;
+
+/* ═══ ENTRY ═══ */
+function E(){
+  if(!DATA.entries[cur])DATA.entries[cur]={
+    quote:"",mood:[],exercise:{label:"",status:null,note:""},
+    food:{rating:null,note:""},learning:[],
+    work:{win:"",flow:null},social:"",wins:[],dump:""
+  };
+  const e=DATA.entries[cur];
+  if(!Array.isArray(e.learning))
+    e.learning=(e.learning&&e.learning.topics?e.learning.topics.map(t=>({topic:t,note:""})):[]);
+  if(!e.exercise||typeof e.exercise!=="object")e.exercise={label:"",status:null,note:""};
+  if(e.exercise.note===undefined)e.exercise.note="";
+  return e;
+}
+
+/* ═══ PICKER ═══ */
+function closePickers(){
+  document.querySelectorAll('.picker').forEach(p=>p.classList.remove("open"));
+  document.querySelectorAll('.ql-tile').forEach(t=>t.classList.remove("picker-open"));
+  updateTileHints();
+}
+function togglePicker(pid){
+  const isOpen=document.getElementById(pid).classList.contains("open");
+  closePickers();
+  if(!isOpen){
+    document.getElementById(pid).classList.add("open");
+    const tile=document.querySelector(`[data-picker="${pid}"]`);
+    if(tile)tile.classList.add("picker-open");
+    updateTileHints();
+  }
+}
+function updateTileHints(){
+  document.querySelectorAll('.ql-tile').forEach(tile=>{
+    const hint=tile.querySelector('.tile-hint');if(!hint)return;
+    hint.textContent=document.getElementById(tile.dataset.picker).classList.contains("open")?"收起 ‹":"點選記錄";
+  });
+}
+
+/* ═══ RENDER PIECES ═══ */
+function renderMoodRow(){
+  document.getElementById("moodRow").innerHTML=(DATA.moods||[]).map(m=>
+    `<button class="mood-btn${E().mood.includes(m.l)?" sel":""}" data-mood="${esc(m.l)}" title="${esc(m.l)}">${esc(m.e)}</button>`
+  ).join("");
+}
+function updateMoodText(){
+  const e=E(),el=document.getElementById("moodSelected");
+  if(e.mood.length){el.textContent=e.mood.join("・");el.style.display="block";}
+  else el.style.display="none";
+}
+function renderExPicker(){
+  const e=E();
+  document.getElementById("exChips").innerHTML=(DATA.exPresets||[]).map(p=>
+    `<button class="chip${e.exercise.label===p?" sel":""}" data-ex="${esc(p)}">${esc(p)}</button>`
+  ).join("");
+  document.getElementById("exIn").value=(DATA.exPresets||[]).includes(e.exercise.label)?"":(e.exercise.label||"");
+  document.querySelectorAll('#exStatus .chip').forEach(b=>b.classList.toggle('sel',b.dataset.v===e.exercise.status));
+  const en=document.getElementById("exNote");en.value=e.exercise.note||"";autoH(en);
+}
+function renderFoodPicker(){
+  const e=E();
+  document.querySelectorAll('#foodStatus .chip').forEach(b=>b.classList.toggle('sel',b.dataset.v===e.food.rating));
+  document.getElementById("foodNote").value=e.food.note;
+}
+function renderLearnPicker(){
+  const e=E();
+  const sel=e.learning.map(en=>en.topic);
+  document.getElementById("learnChips").innerHTML=(DATA.learnTopics||[]).map(t=>
+    `<button class="chip${sel.includes(t)?" sel":""}" data-learn="${esc(t)}">${esc(t)}</button>`
+  ).join("");
+  if(!activeLearnTab||!sel.includes(activeLearnTab))activeLearnTab=sel.length>0?sel[0]:null;
+  const tabsEl=document.getElementById("learnTabs"),contentEl=document.getElementById("learnTabContent");
+  if(!e.learning.length){tabsEl.style.display="none";contentEl.style.display="none";return;}
+  tabsEl.style.display="flex";
+  tabsEl.innerHTML=e.learning.map(en=>
+    `<button class="ltab${activeLearnTab===en.topic?" active":""}" data-ltab="${esc(en.topic)}">${esc(en.topic)}</button>`
+  ).join("");
+  contentEl.style.display="block";
+  const ae=e.learning.find(en=>en.topic===activeLearnTab);
+  const ai=e.learning.findIndex(en=>en.topic===activeLearnTab);
+  contentEl.innerHTML=ae?`<textarea class="inline-ta" data-li="${ai}" placeholder="${esc(activeLearnTab)} 的學習心得…">${esc(ae.note)}</textarea>`:"";
+  document.querySelectorAll('#learnTabContent .inline-ta').forEach(autoH);
+}
+function updateQV(){
+  const e=E();
+  const ev=document.getElementById("qExVal"),et=ev.closest('.ql-tile');
+  const ep=[e.exercise.label,{done:"✅",partial:"🌓",rest:"😴"}[e.exercise.status]].filter(Boolean);
+  if(ep.length){ev.textContent=ep.join(" ");ev.className="tv";et.classList.add("active");}
+  else{ev.textContent="—";ev.className="tv empty";et.classList.remove("active");}
+  const fv=document.getElementById("qFoodVal"),ft=fv.closest('.ql-tile');
+  const fm={good:"😊 好",ok:"😐 普通",meh:"😵 沒吃好"};
+  if(e.food.rating){fv.textContent=fm[e.food.rating];fv.className="tv";ft.classList.add("active");}
+  else{fv.textContent="—";fv.className="tv empty";ft.classList.remove("active");}
+  const lv=document.getElementById("qLearnVal"),lt=lv.closest('.ql-tile');
+  if(e.learning.length){
+    lv.textContent=e.learning.slice(0,2).map(en=>en.topic).join("・")+(e.learning.length>2?"…":"");
+    lv.className="tv";lt.classList.add("active");
+  }else{lv.textContent="—";lv.className="tv empty";lt.classList.remove("active");}
+}
+function renderFlowChips(){
+  const e=E();
+  document.getElementById("flowChips").innerHTML=(DATA.flowStates||[]).map(f=>
+    `<button class="chip${e.work.flow===f?" sel":""}" data-flow="${esc(f)}">${esc(f)}</button>`
+  ).join("");
+}
+
+function renderToday(){
+  const d=pYmd(cur);
+  const ts=ymd(new Date()),ys=ymd(new Date(new Date().setDate(new Date().getDate()-1)));
+  const badge=cur===ts?`<span class="date-today">今天</span>`:cur===ys?`<span class="date-today" style="background:var(--muted)">昨天</span>`:"";
+  document.getElementById("dayNum").textContent=d.getDate();
+  document.getElementById("dayLabel").innerHTML=`${badge}${MON[d.getMonth()]}・${WDAY[d.getDay()]}曜日`;
+  const e=E();
+  const qi=document.getElementById("quoteInput");qi.value=e.quote;autoH(qi);
+  renderMoodRow();updateMoodText();
+  renderExPicker();renderFoodPicker();renderLearnPicker();renderFlowChips();updateQV();
+  document.getElementById("winList").innerHTML=
+    e.wins.map((w,i)=>`<li><span>${esc(w)}</span><button class="x" data-wi="${i}">✕</button></li>`).join("")||"";
+  const dn=document.getElementById("dumpNote");dn.value=e.dump;autoH(dn);
+  document.getElementById("workWin").value=e.work.win;
+  const sn=document.getElementById("socialNote");sn.value=e.social;autoH(sn);
+}
+
+/* ═══ SCORE + REVIEW ═══ */
+function score(k){
+  const e=DATA.entries[k];if(!e)return 0;let s=0;
+  if(e.quote&&e.quote.trim())s++;
+  if(e.mood&&e.mood.length)s++;
+  if(e.exercise){
+    if(e.exercise.status==="done")s+=2;else if(e.exercise.status==="partial")s++;
+    if(e.exercise.label)s++;if(e.exercise.note&&e.exercise.note.trim())s++;
+  }
+  if(e.food&&e.food.rating)s+=(e.food.rating==="good"?2:1);
+  if(Array.isArray(e.learning)&&e.learning.length){
+    s++;if(e.learning.some(en=>en.note&&en.note.trim()))s++;
+  }
+  if(e.work&&(e.work.win.trim()||e.work.flow))s++;
+  if(e.wins&&e.wins.length)s++;if(e.dump&&e.dump.trim())s++;
+  return s;
+}
+function renderReview(){
+  const today=new Date();let cells="",logged=0,great=0,exDone=0,mMap={},lMap={};
+  for(let i=27;i>=0;i--){
+    const d=new Date(today);d.setDate(today.getDate()-i);
+    const k=ymd(d),sc=score(k),e=DATA.entries[k];
+    let cls="";
+    if(e&&sc>0){
+      logged++;if(sc>=8){cls="great";great++;}else if(sc>=3)cls="good";else cls="logged";
+      if(e.exercise&&e.exercise.status==="done")exDone++;
+      (e.mood||[]).forEach(m=>{mMap[m]=(mMap[m]||0)+1;});
+      (Array.isArray(e.learning)?e.learning:[]).forEach(en=>{lMap[en.topic]=(lMap[en.topic]||0)+1;});
+    }
+    const dd=pYmd(k);
+    cells+=`<div class="dot ${cls}" data-date="${k}" title="${MON[dd.getMonth()]} ${dd.getDate()} 日・星期${WDAY[dd.getDay()]}（${sc}分）｜點擊跳到這天">${dd.getMonth()+1}/${dd.getDate()}</div>`;
+  }
+  document.getElementById("streak").innerHTML=cells;
+  document.getElementById("stats").innerHTML=`
+    <div class="stat-b"><div class="num">${logged}</div><div class="lab">有記錄天數</div></div>
+    <div class="stat-b"><div class="num">${exDone}</div><div class="lab">健身打卡</div></div>
+    <div class="stat-b"><div class="num">${great}</div><div class="lab">充實的一天</div></div>`;
+  const ms=Object.entries(mMap).sort((a,b)=>b[1]-a[1]),mt=ms.reduce((s,[,c])=>s+c,0)||1;
+  document.getElementById("moodBreak").innerHTML=ms.length
+    ?ms.map(([m,c])=>`<div class="brow"><span>${m}</span><span style="font-family:'Fraunces',serif;color:var(--sage)">${c}</span></div><div class="bfill"><span style="width:${Math.round(c/mt*100)}%"></span></div>`).join("")
+    :`<span class="empty-hint">還沒有記錄。</span>`;
+  const ls=Object.entries(lMap).sort((a,b)=>b[1]-a[1]),lt=ls.reduce((s,[,c])=>s+c,0)||1;
+  document.getElementById("learnBreak").innerHTML=ls.length
+    ?ls.map(([t,c])=>`<div class="brow"><span>${t}</span><span style="font-family:'Fraunces',serif;color:var(--sage)">${c} 次</span></div><div class="bfill"><span style="width:${Math.round(c/lt*100)}%"></span></div>`).join("")
+    :`<span class="empty-hint">還沒有記錄。</span>`;
+}
+
+/* ═══ LIST EDITOR (reusable) ═══ */
+function makeEditor(containerId, dataKey, isDual){
+  let editIdx=null;
+  const el=document.getElementById(containerId);
+  function render(){
+    const items=DATA[dataKey]||[];
+    if(!items.length){el.innerHTML=`<div class="tl-empty">還沒有項目——按上方「加入」新增。</div>`;return;}
+    el.innerHTML=`<div class="tl-row">${items.map((item,i)=>{
+      if(i===editIdx){
+        const eVal=isDual?esc(item.e||""):"";
+        const lVal=isDual?esc(item.l||""):esc(item);
+        return`<div class="tl-item editing">`+
+          (isDual?`<input class="tl-e emoji-e" value="${eVal}" placeholder="😊" maxlength="4">`:"")
+          +`<input class="tl-e label-e" value="${lVal}" placeholder="名稱">
+          <div class="tl-acts">
+            <button class="tl-act save" title="儲存">✓</button>
+            <button class="tl-act cancel" title="取消">✕</button>
+          </div></div>`;
+      }
+      const label=isDual?`${esc(item.e)} ${esc(item.l)}`:esc(item);
+      return`<div class="tl-item"><span class="tl-name">${label}</span>
+        <div class="tl-acts">
+          <button class="tl-act edit" data-i="${i}" title="改名">✏</button>
+          <button class="tl-act del" data-i="${i}" title="刪除">✕</button>
+        </div></div>`;
+    }).join("")}</div>`;
+    if(editIdx!==null){const f=el.querySelector('.label-e');if(f)f.focus();}
+  }
+  el.addEventListener('click',e=>{
+    const editBtn=e.target.closest('.tl-act.edit');
+    const delBtn=e.target.closest('.tl-act.del');
+    const saveBtn=e.target.closest('.tl-act.save');
+    const cancelBtn=e.target.closest('.tl-act.cancel');
+    if(editBtn){editIdx=+editBtn.dataset.i;render();return;}
+    if(delBtn){DATA[dataKey].splice(+delBtn.dataset.i,1);editIdx=null;save();render();return;}
+    if(saveBtn){
+      const cont=e.target.closest('.tl-item');
+      const lInp=cont?.querySelector('.label-e');
+      const eInp=cont?.querySelector('.emoji-e');
+      if(lInp&&lInp.value.trim()){
+        DATA[dataKey][editIdx]=isDual?{e:eInp?.value.trim()||"😊",l:lInp.value.trim()}:lInp.value.trim();
+        save();
+      }
+      editIdx=null;render();return;
+    }
+    if(cancelBtn){editIdx=null;render();return;}
+  });
+  el.addEventListener('keydown',e=>{
+    if(e.key==="Enter"&&e.target.classList.contains('tl-e'))
+      {el.querySelector('.tl-act.save')?.click();return;}
+    if(e.key==="Escape"){editIdx=null;render();}
+  });
+  function addItem(label,emoji){
+    if(!label.trim())return;
+    DATA[dataKey].push(isDual?{e:emoji||"😊",l:label.trim()}:label.trim());
+    save();render();
+  }
+  return{render,addItem};
+}
+
+const exEditor    = makeEditor('exList',    'exPresets',   false);
+const learnEditor = makeEditor('learnList', 'learnTopics', false);
+const moodEditor  = makeEditor('moodList',  'moods',       true);
+const flowEditor  = makeEditor('flowList',  'flowStates',  false);
+
+function renderSettings(){
+  exEditor.render();learnEditor.render();moodEditor.render();flowEditor.render();
+}
+
+/* ═══ EVENTS ═══ */
+document.getElementById("prev").onclick=()=>{const d=pYmd(cur);d.setDate(d.getDate()-1);cur=ymd(d);closePickers();renderToday();};
+document.getElementById("next").onclick=()=>{const d=pYmd(cur);d.setDate(d.getDate()+1);cur=ymd(d);closePickers();renderToday();};
+
+document.getElementById("quoteInput").addEventListener("input",e=>{E().quote=e.target.value;save();autoH(e.target);});
+
+document.getElementById("moodRow").addEventListener("click",e=>{
+  const b=e.target.closest("[data-mood]");if(!b)return;
+  const m=b.dataset.mood,arr=E().mood,i=arr.indexOf(m);
+  if(i>=0)arr.splice(i,1);else arr.push(m);
+  save();renderMoodRow();updateMoodText();
+});
+
+document.querySelectorAll('.ql-tile').forEach(tile=>tile.onclick=()=>togglePicker(tile.dataset.picker));
+
+document.getElementById("exChips").addEventListener("click",e=>{
+  const b=e.target.closest("[data-ex]");if(!b)return;
+  E().exercise.label=E().exercise.label===b.dataset.ex?"":b.dataset.ex;
+  document.getElementById("exIn").value="";save();renderExPicker();updateQV();
+});
+document.getElementById("exIn").addEventListener("input",e=>{E().exercise.label=e.target.value;save();updateQV();});
+document.getElementById("exStatus").addEventListener("click",e=>{
+  const b=e.target.closest("[data-v]");if(!b)return;
+  E().exercise.status=E().exercise.status===b.dataset.v?null:b.dataset.v;save();renderExPicker();updateQV();
+});
+document.getElementById("exNote").addEventListener("input",e=>{E().exercise.note=e.target.value;save();autoH(e.target);});
+
+document.getElementById("foodStatus").addEventListener("click",e=>{
+  const b=e.target.closest("[data-v]");if(!b)return;
+  E().food.rating=E().food.rating===b.dataset.v?null:b.dataset.v;save();renderFoodPicker();updateQV();
+});
+document.getElementById("foodNote").addEventListener("input",e=>{E().food.note=e.target.value;save();});
+
+document.getElementById("learnChips").addEventListener("click",e=>{
+  const b=e.target.closest("[data-learn]");if(!b)return;
+  const t=b.dataset.learn,arr=E().learning,i=arr.findIndex(en=>en.topic===t);
+  if(i>=0)arr.splice(i,1);else arr.push({topic:t,note:""});
+  save();renderLearnPicker();updateQV();
+});
+document.getElementById("learnTabs").addEventListener("click",e=>{
+  const b=e.target.closest("[data-ltab]");if(!b)return;
+  activeLearnTab=b.dataset.ltab;renderLearnPicker();
+});
+document.getElementById("learnTabContent").addEventListener("input",e=>{
+  const ta=e.target.closest("[data-li]");if(!ta)return;
+  E().learning[+ta.dataset.li].note=ta.value;save();autoH(ta);
+});
+
+document.getElementById("winAdd").onclick=()=>{
+  const inp=document.getElementById("winIn"),v=inp.value.trim();if(!v)return;
+  E().wins.push(v);inp.value="";save();renderToday();
+};
+document.getElementById("winIn").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("winAdd").click();});
+document.getElementById("winList").addEventListener("click",e=>{
+  const x=e.target.closest("[data-wi]");if(!x)return;
+  E().wins.splice(+x.dataset.wi,1);save();renderToday();
+});
+
+document.getElementById("dumpNote").addEventListener("input",e=>{E().dump=e.target.value;save();autoH(e.target);});
+document.getElementById("workWin").addEventListener("input",e=>{E().work.win=e.target.value;save();});
+document.getElementById("flowChips").addEventListener("click",e=>{
+  const b=e.target.closest("[data-flow]");if(!b)return;
+  E().work.flow=E().work.flow===b.dataset.flow?null:b.dataset.flow;save();renderFlowChips();
+});
+document.getElementById("socialNote").addEventListener("input",e=>{E().social=e.target.value;save();autoH(e.target);});
+document.getElementById("moreToggle").onclick=function(){
+  this.classList.toggle("open");document.getElementById("moreBody").classList.toggle("open");
+};
+
+// nav tabs
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById(b.dataset.tab).classList.add('on');
+  if(b.dataset.tab==="review")renderReview();
+  if(b.dataset.tab==="set")renderSettings();
+});
+
+// review dots → jump
+document.getElementById("streak").addEventListener("click",e=>{
+  const dot=e.target.closest(".dot[data-date]");if(!dot)return;
+  cur=dot.dataset.date;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));
+  document.querySelector('nav button[data-tab="today"]').classList.add('on');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById("today").classList.add('on');
+  closePickers();renderToday();
+});
+
+// settings accordions
+document.querySelectorAll('.sc-head').forEach(h=>h.onclick=()=>{
+  h.classList.toggle("open");
+  document.getElementById(h.dataset.acc)?.classList.toggle("open");
+});
+
+// settings – targets
+document.getElementById("saveTargets").onclick=()=>{DATA.targets=document.getElementById("targets").value.trim();save();flash("tSaved");};
+
+// settings – add presets
+document.getElementById("addExBtn").onclick=()=>{
+  const v=document.getElementById("addExIn").value;
+  exEditor.addItem(v);document.getElementById("addExIn").value="";
+};
+document.getElementById("addExIn").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("addExBtn").click();});
+
+document.getElementById("addLearnBtn").onclick=()=>{
+  const v=document.getElementById("addLearnIn").value;
+  learnEditor.addItem(v);document.getElementById("addLearnIn").value="";
+};
+document.getElementById("addLearnIn").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("addLearnBtn").click();});
+
+document.getElementById("addMoodBtn").onclick=()=>{
+  const emoji=document.getElementById("addMoodEmoji").value.trim();
+  const label=document.getElementById("addMoodLabel").value.trim();
+  if(!label)return;
+  moodEditor.addItem(label,emoji||"😊");
+  document.getElementById("addMoodEmoji").value="";
+  document.getElementById("addMoodLabel").value="";
+};
+document.getElementById("addMoodLabel").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("addMoodBtn").click();});
+
+document.getElementById("addFlowBtn").onclick=()=>{
+  const v=document.getElementById("addFlowIn").value;
+  flowEditor.addItem(v);document.getElementById("addFlowIn").value="";
+};
+document.getElementById("addFlowIn").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("addFlowBtn").click();});
+
+// export / import
+document.getElementById("exportBtn").onclick=()=>{
+  const blob=new Blob([JSON.stringify(DATA,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download=`每日節奏_${ymd(new Date())}.json`;a.click();URL.revokeObjectURL(url);
+};
+document.getElementById("importToggle").onclick=()=>{
+  const w=document.getElementById("importWrap");w.style.display=w.style.display==="none"?"block":"none";
+};
+document.getElementById("importConfirm").onclick=()=>{
+  const text=document.getElementById("importArea").value.trim();if(!text)return;
+  let parsed;try{parsed=JSON.parse(text);}catch(e){alert("JSON 格式錯誤。");return;}
+  if(!parsed.entries){alert("格式不正確。");return;}
+  if(!confirm("確定匯入？這會覆蓋現有的全部資料。"))return;
+  DATA=Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),parsed);
+  save();document.getElementById("importArea").value="";
+  document.getElementById("importWrap").style.display="none";
+  document.getElementById("targets").value=DATA.targets||"";
+  renderSettings();renderToday();flash("importOK");
+};
+document.getElementById("reset").onclick=()=>{
+  if(confirm("確定清空全部紀錄嗎？建議先備份。")){
+    const preserve={exPresets:DATA.exPresets,learnTopics:DATA.learnTopics,moods:DATA.moods,flowStates:DATA.flowStates,targets:DATA.targets};
+    DATA=Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),preserve,{entries:{}});
+    save();renderSettings();renderToday();
+  }
+};
+
+/* ═══ INIT ═══ */
+load();
+document.getElementById("targets").value=DATA.targets||"";
+renderToday();
+</script>
+</body>
+</html>

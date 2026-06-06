@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Abby Personal OS｜Index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4EDE0;--paper:#FFFDF8;--ink:#2C2420;--muted:#9A8C7C;
+  --line:#E2D8C8;--faint:#EDE5D4;--sage:#648B57;--sage-s:#DDE9D3;
+  --clay:#C97A5C;--sand:#D4A843;--shadow:0 10px 60px -15px rgba(50,30,10,.16);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  min-height:100vh;font-family:"Noto Sans TC",sans-serif;color:var(--ink);
+  background:radial-gradient(ellipse at 15% 0%,#fff8ea 0,transparent 55%),
+  radial-gradient(ellipse at 85% 5%,#e8f0e0 0,transparent 50%),var(--bg);
+  -webkit-font-smoothing:antialiased;line-height:1.6;
+}
+.wrap{max-width:680px;margin:0 auto;padding:30px 20px 86px}
+header{margin-bottom:20px}
+.kicker{font-family:"Fraunces",serif;color:var(--clay);font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase}
+h1{font-family:"Noto Serif TC",serif;font-weight:700;font-size:1.78rem;letter-spacing:.3px;margin-top:4px}
+.sub{color:var(--muted);font-size:.88rem;margin-top:5px;line-height:1.8}
+.paper{background:var(--paper);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
+.date-sec{padding:24px 26px 20px;border-bottom:1.5px solid var(--line);background:linear-gradient(135deg,#fffdf5,#f0f7ea)}
+.date-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.date-num{font-family:"Fraunces",serif;font-size:3rem;line-height:1;color:var(--clay);font-weight:400;letter-spacing:-1px}
+.date-label{font-family:"Fraunces",serif;font-size:.88rem;color:var(--muted);letter-spacing:.3px;margin-top:5px}
+.badge{display:inline-block;background:var(--clay);color:#fff;font-size:.64rem;letter-spacing:.8px;text-transform:uppercase;padding:3px 9px;border-radius:99px;font-family:"Fraunces",serif;white-space:nowrap}
+.sec{padding:20px 26px;border-bottom:1px solid var(--line)}
+.sec:last-child{border-bottom:none}
+.sec-lbl{font-family:"Fraunces",serif;font-size:.68rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.system-list{display:grid;gap:12px}
+.system{display:grid;grid-template-columns:46px 1fr auto;gap:12px;align-items:center;background:#fffaf2;border:1px solid var(--line);border-radius:18px;padding:14px;text-decoration:none;color:var(--ink);transition:.18s ease}
+.system:hover{transform:translateY(-1px);border-color:var(--sage);background:#fbfdf7}
+.ico{width:42px;height:42px;border-radius:15px;background:var(--faint);display:flex;align-items:center;justify-content:center;font-size:1.35rem}
+.system h2{font-family:"Noto Serif TC",serif;font-size:1rem;font-weight:700;margin-bottom:2px}
+.system p{color:var(--muted);font-size:.8rem;line-height:1.55}
+.arrow{font-family:"Fraunces",serif;color:var(--clay);font-size:1.2rem}
+.note{background:#fdf3ea;border:1px dashed var(--sand);color:#7a6a52;border-radius:18px;padding:14px 16px;font-size:.85rem;line-height:1.8;margin-top:14px}
+.mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mini{background:var(--faint);border:1px solid var(--line);border-radius:16px;padding:13px 12px}
+.mini b{display:block;font-size:.84rem;margin-bottom:4px}
+.mini span{display:block;color:var(--muted);font-size:.74rem;line-height:1.5}
+footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:26px;line-height:2}
+@media(max-width:560px){
+  .wrap{padding:24px 16px 70px}.date-sec,.sec{padding-left:18px;padding-right:18px}
+  .date-num{font-size:2.45rem}.system{grid-template-columns:42px 1fr;align-items:flex-start}.arrow{display:none}.mini-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="kicker">abby personal os</div>
+  <h1>我的生活系統</h1>
+  <div class="sub">三個工具分開使用，但都服務同一件事：讓生活慢慢被看見，不是被評分。</div>
+</header>
+
+<main class="paper">
+  <section class="date-sec">
+    <div class="date-top">
+      <div>
+        <div class="date-num" id="dayNum">—</div>
+        <div class="date-label" id="dayLabel">—</div>
+      </div>
+      <div class="badge">daily rhythm</div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-lbl">Open Today</div>
+    <div class="system-list">
+      <a class="system" href="Diary.html">
+        <div class="ico">🌿</div>
+        <div><h2>Daily Rhythm</h2><p>心情、學習、生活、今日小勝利。低壓力地留下每天的狀態。</p></div>
+        <div class="arrow">→</div>
+      </a>
+      <a class="system" href="Food.html">
+        <div class="ico">🍽️</div>
+        <div><h2>Food OS</h2><p>食材資料庫、飲食 JSON、Combo、營養缺口。吃完再補也可以。</p></div>
+        <div class="arrow">→</div>
+      </a>
+      <a class="system" href="Workout.html">
+        <div class="ico">🏋️</div>
+        <div><h2>Workout Coach OS</h2><p>Today 課表、Hevy 匯入、動作庫、Coach Notes。像教練，不像壓力表。</p></div>
+        <div class="arrow">→</div>
+      </a>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-lbl">How to use</div>
+    <div class="mini-grid">
+      <div class="mini"><b>🌿 每天</b><span>先記心情、學習、生活碎片。</span></div>
+      <div class="mini"><b>🍽️ 吃完</b><span>用 Food OS 補記，不需要完美。</span></div>
+      <div class="mini"><b>🏋️ 訓練日</b><span>看 Today，練完用 Hevy 或 JSON 匯入。</span></div>
+    </div>
+    <div class="note">記錄，不評分。你不是要每天都很完美，而是讓資料慢慢累積，之後才知道自己怎麼調整。</div>
+  </section>
+</main>
+
+<footer>
+Abby Personal OS<br>
+Record softly · Review honestly · Improve slowly
+</footer>
+</div>
+
+<script>
+const d=new Date();
+const days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+document.getElementById("dayNum").textContent=d.getDate();
+document.getElementById("dayLabel").textContent=`${d.getFullYear()} / ${String(d.getMonth()+1).padStart(2,"0")} · ${days[d.getDay()]}`;
+</script>
+</body>
+</html>
