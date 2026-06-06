@@ -1,120 +1,196 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Abby Personal OS｜Index</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>個人工作區</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Noto+Sans+TC:wght@400;500&family=Noto+Serif+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F4EDE0;--paper:#FFFDF8;--ink:#2C2420;--muted:#9A8C7C;
-  --line:#E2D8C8;--faint:#EDE5D4;--sage:#648B57;--sage-s:#DDE9D3;
-  --clay:#C97A5C;--sand:#D4A843;--shadow:0 10px 60px -15px rgba(50,30,10,.16);
+  --paper:#FFFDF8;--ink:#2C2420;--muted:#9A8C7C;
+  --line:#DDD0BC;--clay:#C97A5C;--margin:#EFC8C0;
 }
-*{box-sizing:border-box;margin:0;padding:0}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
 body{
-  min-height:100vh;font-family:"Noto Sans TC",sans-serif;color:var(--ink);
-  background:radial-gradient(ellipse at 15% 0%,#fff8ea 0,transparent 55%),
-  radial-gradient(ellipse at 85% 5%,#e8f0e0 0,transparent 50%),var(--bg);
-  -webkit-font-smoothing:antialiased;line-height:1.6;
+  font-family:"Noto Sans TC",sans-serif;
+  background:#EDE4D2;
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  display:flex;justify-content:center;
 }
-.wrap{max-width:680px;margin:0 auto;padding:30px 20px 86px}
-header{margin-bottom:20px}
-.kicker{font-family:"Fraunces",serif;color:var(--clay);font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase}
-h1{font-family:"Noto Serif TC",serif;font-weight:700;font-size:1.78rem;letter-spacing:.3px;margin-top:4px}
-.sub{color:var(--muted);font-size:.88rem;margin-top:5px;line-height:1.8}
-.paper{background:var(--paper);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
-.date-sec{padding:24px 26px 20px;border-bottom:1.5px solid var(--line);background:linear-gradient(135deg,#fffdf5,#f0f7ea)}
-.date-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
-.date-num{font-family:"Fraunces",serif;font-size:3rem;line-height:1;color:var(--clay);font-weight:400;letter-spacing:-1px}
-.date-label{font-family:"Fraunces",serif;font-size:.88rem;color:var(--muted);letter-spacing:.3px;margin-top:5px}
-.badge{display:inline-block;background:var(--clay);color:#fff;font-size:.64rem;letter-spacing:.8px;text-transform:uppercase;padding:3px 9px;border-radius:99px;font-family:"Fraunces",serif;white-space:nowrap}
-.sec{padding:20px 26px;border-bottom:1px solid var(--line)}
-.sec:last-child{border-bottom:none}
-.sec-lbl{font-family:"Fraunces",serif;font-size:.68rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
-.system-list{display:grid;gap:12px}
-.system{display:grid;grid-template-columns:46px 1fr auto;gap:12px;align-items:center;background:#fffaf2;border:1px solid var(--line);border-radius:18px;padding:14px;text-decoration:none;color:var(--ink);transition:.18s ease}
-.system:hover{transform:translateY(-1px);border-color:var(--sage);background:#fbfdf7}
-.ico{width:42px;height:42px;border-radius:15px;background:var(--faint);display:flex;align-items:center;justify-content:center;font-size:1.35rem}
-.system h2{font-family:"Noto Serif TC",serif;font-size:1rem;font-weight:700;margin-bottom:2px}
-.system p{color:var(--muted);font-size:.8rem;line-height:1.55}
-.arrow{font-family:"Fraunces",serif;color:var(--clay);font-size:1.2rem}
-.note{background:#fdf3ea;border:1px dashed var(--sand);color:#7a6a52;border-radius:18px;padding:14px 16px;font-size:.85rem;line-height:1.8;margin-top:14px}
-.mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.mini{background:var(--faint);border:1px solid var(--line);border-radius:16px;padding:13px 12px}
-.mini b{display:block;font-size:.84rem;margin-bottom:4px}
-.mini span{display:block;color:var(--muted);font-size:.74rem;line-height:1.5}
-footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:26px;line-height:2}
-@media(max-width:560px){
-  .wrap{padding:24px 16px 70px}.date-sec,.sec{padding-left:18px;padding-right:18px}
-  .date-num{font-size:2.45rem}.system{grid-template-columns:42px 1fr;align-items:flex-start}.arrow{display:none}.mini-grid{grid-template-columns:1fr}
+
+/* ── single notebook page ── */
+.page{
+  background:var(--paper);
+  width:100%;max-width:560px;
+  min-height:100%;
+  padding:44px 40px 80px 54px;
+  position:relative;
+  box-shadow:2px 0 24px rgba(0,0,0,.06),-2px 0 24px rgba(0,0,0,.04);
+}
+
+/* red margin line */
+.page::before{
+  content:"";position:absolute;
+  left:34px;top:0;bottom:0;
+  width:1.5px;background:var(--margin);opacity:.65;
+}
+
+/* ── month / year bar ── */
+.top-bar{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding-bottom:9px;border-bottom:1px solid var(--line);margin-bottom:22px;
+}
+.top-month{
+  font-family:"Fraunces",serif;font-size:.72rem;
+  letter-spacing:2px;text-transform:uppercase;color:var(--clay);
+}
+.top-year{
+  font-family:"Fraunces",serif;font-size:.7rem;
+  letter-spacing:1px;color:var(--muted);
+}
+
+/* ── big date ── */
+.date-block{
+  text-align:center;
+  padding:10px 0 22px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:32px;
+}
+.date-num{
+  font-family:"Fraunces",serif;font-size:5.5rem;font-weight:300;
+  line-height:1;color:var(--ink);letter-spacing:-4px;display:block;
+}
+.date-wday{
+  font-family:"Noto Serif TC",serif;font-size:.88rem;
+  color:var(--muted);margin-top:8px;letter-spacing:.5px;
+}
+
+/* ── index label ── */
+.idx-label{
+  font-family:"Fraunces",serif;font-size:.65rem;
+  letter-spacing:2.2px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:14px;
+}
+
+/* ── entries ── */
+a.entry{
+  display:block;text-decoration:none;color:inherit;
+  padding:19px 0;border-bottom:1px solid var(--line);
+  transition:padding-left .2s ease;
+  position:relative;
+}
+a.entry:first-of-type{border-top:1px solid var(--line)}
+a.entry:hover{padding-left:8px}
+
+.entry-row{display:flex;align-items:flex-start;gap:13px}
+
+.entry-ord{
+  font-family:"Fraunces",serif;font-size:.74rem;
+  color:var(--muted);flex-shrink:0;min-width:16px;
+  margin-top:3px;letter-spacing:.3px;
+}
+.entry-body{flex:1;min-width:0}
+.entry-name{
+  font-family:"Noto Serif TC",serif;font-size:1.06rem;
+  font-weight:700;color:var(--ink);letter-spacing:.2px;
+  display:block;margin-bottom:5px;transition:color .18s;
+}
+a.entry:hover .entry-name{color:var(--clay)}
+.entry-desc{
+  font-size:.83rem;color:var(--muted);line-height:1.65;
+  margin-bottom:8px;
+}
+.entry-tabs{
+  font-family:"Fraunces",serif;font-size:.7rem;
+  color:var(--muted);letter-spacing:.3px;opacity:.75;
+}
+.entry-arr{
+  font-family:"Fraunces",serif;font-size:.95rem;
+  color:var(--muted);flex-shrink:0;margin-top:2px;
+  transition:transform .18s,color .18s;
+}
+a.entry:hover .entry-arr{transform:translateX(4px);color:var(--clay)}
+
+/* ── footer ── */
+.foot{
+  margin-top:38px;
+  font-family:"Fraunces",serif;font-size:.7rem;
+  letter-spacing:1px;color:var(--muted);
+  text-align:center;
+}
+
+@media(max-width:440px){
+  .page{padding:32px 22px 60px 42px}
+  .date-num{font-size:4.2rem}
 }
 </style>
 </head>
 <body>
-<div class="wrap">
-<header>
-  <div class="kicker">abby personal os</div>
-  <h1>我的生活系統</h1>
-  <div class="sub">三個工具分開使用，但都服務同一件事：讓生活慢慢被看見，不是被評分。</div>
-</header>
+<div class="page">
 
-<main class="paper">
-  <section class="date-sec">
-    <div class="date-top">
-      <div>
-        <div class="date-num" id="dayNum">—</div>
-        <div class="date-label" id="dayLabel">—</div>
+  <div class="top-bar">
+    <span class="top-month" id="tMonth">—</span>
+    <span class="top-year"  id="tYear">—</span>
+  </div>
+
+  <div class="date-block">
+    <span class="date-num"  id="dNum">—</span>
+    <div  class="date-wday" id="dWday">—</div>
+  </div>
+
+  <div class="idx-label">日誌系統</div>
+
+  <a class="entry" href="Diary.html">
+    <div class="entry-row">
+      <span class="entry-ord">一</span>
+      <div class="entry-body">
+        <span class="entry-name">每日節奏</span>
+        <div class="entry-desc">生活紀錄主頁——心情、學習、飲食概況、小成就與 Brain Dump。回顧頁查 28 天記錄。</div>
+        <div class="entry-tabs">今日 · 回顧 · 設定</div>
       </div>
-      <div class="badge">daily rhythm</div>
+      <span class="entry-arr">›</span>
     </div>
-  </section>
+  </a>
 
-  <section class="sec">
-    <div class="sec-lbl">Open Today</div>
-    <div class="system-list">
-      <a class="system" href="Diary.html">
-        <div class="ico">🌿</div>
-        <div><h2>Daily Rhythm</h2><p>心情、學習、生活、今日小勝利。低壓力地留下每天的狀態。</p></div>
-        <div class="arrow">→</div>
-      </a>
-      <a class="system" href="Food.html">
-        <div class="ico">🍽️</div>
-        <div><h2>Food OS</h2><p>食材資料庫、飲食 JSON、Combo、營養缺口。吃完再補也可以。</p></div>
-        <div class="arrow">→</div>
-      </a>
-      <a class="system" href="Workout.html">
-        <div class="ico">🏋️</div>
-        <div><h2>Workout Coach OS</h2><p>Today 課表、Hevy 匯入、動作庫、Coach Notes。像教練，不像壓力表。</p></div>
-        <div class="arrow">→</div>
-      </a>
+  <a class="entry" href="Food.html">
+    <div class="entry-row">
+      <span class="entry-ord">二</span>
+      <div class="entry-body">
+        <span class="entry-name">Food OS</span>
+        <div class="entry-desc">飲食紀錄與食材管理——每日記錄、食材資料庫、Combo、飲食指引。工具算缺口，不做假推薦。</div>
+        <div class="entry-tabs">Dashboard · 今日紀錄 · 食材庫 · History · Guide</div>
+      </div>
+      <span class="entry-arr">›</span>
     </div>
-  </section>
+  </a>
 
-  <section class="sec">
-    <div class="sec-lbl">How to use</div>
-    <div class="mini-grid">
-      <div class="mini"><b>🌿 每天</b><span>先記心情、學習、生活碎片。</span></div>
-      <div class="mini"><b>🍽️ 吃完</b><span>用 Food OS 補記，不需要完美。</span></div>
-      <div class="mini"><b>🏋️ 訓練日</b><span>看 Today，練完用 Hevy 或 JSON 匯入。</span></div>
+  <a class="entry" href="Workout.html">
+    <div class="entry-row">
+      <span class="entry-ord">三</span>
+      <div class="entry-body">
+        <span class="entry-name">Workout Coach OS</span>
+        <div class="entry-desc">教練優先，不是記錄壓力。Today 看課表，Import 接 Hevy，Review 給下週調整，Progress 追長期進度。</div>
+        <div class="entry-tabs">Dashboard · Today · Weekly · Progress · History</div>
+      </div>
+      <span class="entry-arr">›</span>
     </div>
-    <div class="note">記錄，不評分。你不是要每天都很完美，而是讓資料慢慢累積，之後才知道自己怎麼調整。</div>
-  </section>
-</main>
+  </a>
 
-<footer>
-Abby Personal OS<br>
-Record softly · Review honestly · Improve slowly
-</footer>
+  <div class="foot">Abby's Life Hub.</div>
+
 </div>
-
 <script>
-const d=new Date();
-const days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-document.getElementById("dayNum").textContent=d.getDate();
-document.getElementById("dayLabel").textContent=`${d.getFullYear()} / ${String(d.getMonth()+1).padStart(2,"0")} · ${days[d.getDay()]}`;
+const W=["日","月","火","水","木","金","土"];
+const M=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const n=new Date();
+document.getElementById("tMonth").textContent=M[n.getMonth()].toUpperCase();
+document.getElementById("tYear").textContent=n.getFullYear();
+document.getElementById("dNum").textContent=n.getDate();
+document.getElementById("dWday").textContent=W[n.getDay()]+"曜日";
 </script>
 </body>
 </html>
