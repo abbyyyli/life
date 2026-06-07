@@ -13,23 +13,25 @@
   --line:#DDD0BC;--clay:#C97A5C;--margin:#EFC8C0;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
+html,body{min-height:100%;overflow-x:hidden}
 body{
   font-family:"Noto Sans TC",sans-serif;
   background:#EDE4D2;
   color:var(--ink);
   -webkit-font-smoothing:antialiased;
-  display:flex;justify-content:center;
+  display:block;
 }
 
 /* ── single notebook page ── */
 .page{
   background:var(--paper);
-  width:100%;max-width:560px;
-  min-height:100%;
+  width:min(100vw,560px);
+  min-height:100vh;
+  margin:0 auto;
   padding:44px 40px 80px 54px;
   position:relative;
   box-shadow:2px 0 24px rgba(0,0,0,.06),-2px 0 24px rgba(0,0,0,.04);
+  overflow:hidden;
 }
 
 /* red margin line */
@@ -124,8 +126,18 @@ a.entry:hover .entry-arr{transform:translateX(4px);color:var(--clay)}
 }
 
 @media(max-width:440px){
-  .page{padding:32px 22px 60px 42px}
+  .page{
+    width:100vw;
+    max-width:none;
+    margin:0;
+    padding:30px 18px 72px 34px;
+    box-shadow:none;
+  }
+  .page::before{left:22px}
   .date-num{font-size:4.2rem}
+  .entry-row{gap:10px}
+  .entry-desc{font-size:.82rem;line-height:1.6}
+  .entry-tabs{font-size:.66rem}
 }
 </style>
 </head>
