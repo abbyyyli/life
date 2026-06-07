@@ -558,46 +558,103 @@ footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:28px;lin
       <span class="acc-arr">›</span>
     </div>
     <div class="acc-body" id="accJsonPrompts">
-      <p>把今天做的事丟給 AI，用這些 prompt 輸出可匯入 Diary 的摘要 JSON。規則：只輸出合法 JSON，不要 markdown，不要解釋。</p>
+      <p>可直接編輯，內容會自動儲存並跟備份一起匯出。</p>
+      <div class="sync-card prompt-card">
+        <h3>📖 Project Intro</h3>
+        <textarea class="sync-ta" id="prompt_projectIntro" data-prompt-key="projectIntro">Daily Rhythm / My Diary 是個人生活節奏與每日摘要系統。
 
-      <div class="sync-card">
+定位：
+不是嚴格打卡工具，而是把每天的狀態、學習、飲食、運動、生活事項收成一個輕量日記與回顧中心。
+
+核心架構：
+1. Today：記錄今天一句話、心情、節奏、運動、飲食、學習、小成就、Brain Dump。
+2. Summary：可同步 Food OS、Workout OS、Learning JSON、Other JSON，整理成今日摘要。
+3. Review：回顧最近 28 天的記錄密度、心情分佈、學習主題。
+4. Settings：管理預設選項、Prompt、資料同步與備份。
+
+使用方式：
+- 今天學了什麼 → 使用 Learning Summary Prompt。
+- 今天做了哪些生活雜事 → 使用 Other Summary Prompt。
+- Food / Workout → 從 Food OS / Workout OS 匯出今日 JSON 後貼進 Data Sync。
+- 每週或換裝置前 → 匯出全部 JSON 備份。</textarea>
+      </div>
+
+      <div class="sync-card prompt-card">
+        <h3>🧱 JSON Robustness Rules</h3>
+        <textarea class="sync-ta" id="prompt_globalRules" data-prompt-key="globalRules">所有 Daily Rhythm 的 JSON 輸出都必須遵守：
+
+1. 使用 json code block 包裝輸出。
+2. 不要在 code block 外加入任何文字。
+3. 不要輸出解釋。
+4. code block 內必須是合法 JSON。
+5. JSON key 和 string value 必須使用雙引號。
+6. 不要使用註解。
+7. 不要使用 trailing comma。
+8. 數值必須是 number，不要把單位寫進數值。
+9. 若需要估算，請在該 item 加上 &quot;estimated&quot;: true。
+10. 只有當使用者明確要求「純 JSON / 不要 markdown」時，才輸出裸 JSON。</textarea>
+      </div>
+
+      <div class="sync-card prompt-card">
         <h3>📚 Learning Summary Prompt</h3>
-        <textarea class="sync-ta" readonly>你是 Daily Rhythm 的 Learning Summary Parser。
+        <textarea class="sync-ta" id="prompt_learningSummary" data-prompt-key="learningSummary">你是 Daily Rhythm 的 Learning Summary Parser。
 
 請將我今天的學習內容整理成 Diary 可匯入的 Learning JSON。
 
 輸出規則：
-1. 只輸出合法 JSON，不要 markdown，不要解釋。
-2. 格式必須是 {"date":"YYYY-MM-DD","learning":[]}。
-3. learning 是 array，每個 item 必須包含 category 和 items。
-4. category 是大類，例如：泰文、英文、AI、程式、Marketing、閱讀、求職、其他。
-5. items 是 array，列出具體做了什麼。
-6. 不要把所有內容塞進同一類；請依主題精準分類。
-7. 若我沒有給日期，使用今天日期。
-8. 內容要保留細節，但不要寫成長篇心得。
+1. 使用 json code block 包裝輸出。
+2. 不要在 code block 外加入任何文字。
+3. 不要輸出解釋。
+4. code block 內必須是合法 JSON。
+5. 格式必須是 {&quot;date&quot;:&quot;YYYY-MM-DD&quot;,&quot;learning&quot;:[]}。
+6. learning 是 array，每個 item 必須包含 category 和 items。
+7. category 是大類，例如：泰文、英文、AI、程式、Marketing、閱讀、求職、其他。
+8. items 是 array，列出具體做了什麼。
+9. 不要把所有內容塞進同一類；請依主題精準分類。
+10. 若我沒有給日期，使用今天日期。
+11. 內容要保留細節，但不要寫成長篇心得。
 
 範例輸出：
-{"date":"2026-06-07","learning":[{"category":"泰文","items":["Book 2 Ch2 課文內容","整理 10 個生活句型"]},{"category":"英文","items":["Shadowing 20 mins","練習咖啡廳面試回答"]}]}</textarea>
+```json
+{
+  &quot;date&quot;:&quot;2026-06-07&quot;,
+  &quot;learning&quot;:[
+    {&quot;category&quot;:&quot;泰文&quot;,&quot;items&quot;:[&quot;Book 2 Ch2 課文內容&quot;,&quot;整理 10 個生活句型&quot;]},
+    {&quot;category&quot;:&quot;英文&quot;,&quot;items&quot;:[&quot;Shadowing 20 mins&quot;,&quot;練習咖啡廳面試回答&quot;]}
+  ]
+}
+```</textarea>
       </div>
 
-      <div class="sync-card">
+      <div class="sync-card prompt-card">
         <h3>🧩 Other Summary Prompt</h3>
-        <textarea class="sync-ta" readonly>你是 Daily Rhythm 的 Other Summary Parser。
+        <textarea class="sync-ta" id="prompt_otherSummary" data-prompt-key="otherSummary">你是 Daily Rhythm 的 Other Summary Parser。
 
 請將我今天除了飲食、運動、學習以外的生活事項整理成 Diary 可匯入的 Other JSON。
 
 輸出規則：
-1. 只輸出合法 JSON，不要 markdown，不要解釋。
-2. 格式必須是 {"date":"YYYY-MM-DD","other":[]}。
-3. other 是 array，每個 item 必須包含 category 和 items。
-4. category 是生活類別，例如：保養、家務、社交、工作、出門、情緒整理、健康、休息、其他。
-5. items 是 array，列出具體做了什麼。
-6. 如果我說「刮痧按摩」，category 應該是「保養」，items 放「刮痧按摩」。
-7. 不要過度分類，但也不要全部塞進其他。
-8. 若我沒有給日期，使用今天日期。
+1. 使用 json code block 包裝輸出。
+2. 不要在 code block 外加入任何文字。
+3. 不要輸出解釋。
+4. code block 內必須是合法 JSON。
+5. 格式必須是 {&quot;date&quot;:&quot;YYYY-MM-DD&quot;,&quot;other&quot;:[]}。
+6. other 是 array，每個 item 必須包含 category 和 items。
+7. category 是生活類別，例如：保養、家務、社交、工作、出門、情緒整理、健康、休息、其他。
+8. items 是 array，列出具體做了什麼。
+9. 如果我說「刮痧按摩」，category 應該是「保養」，items 放「刮痧按摩」。
+10. 不要過度分類，但也不要全部塞進其他。
+11. 若我沒有給日期，使用今天日期。
 
 範例輸出：
-{"date":"2026-06-07","other":[{"category":"保養","items":["刮痧按摩"]},{"category":"家務","items":["整理房間","洗衣服"]}]}</textarea>
+```json
+{
+  &quot;date&quot;:&quot;2026-06-07&quot;,
+  &quot;other&quot;:[
+    {&quot;category&quot;:&quot;保養&quot;,&quot;items&quot;:[&quot;刮痧按摩&quot;]},
+    {&quot;category&quot;:&quot;家務&quot;,&quot;items&quot;:[&quot;整理房間&quot;,&quot;洗衣服&quot;]}
+  ]
+}
+```</textarea>
       </div>
     </div>
   </div>
@@ -690,6 +747,12 @@ footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:28px;lin
 
 <script>
 /* ═══ DEFAULTS ═══ */
+const DEFAULT_PROMPTS = {
+  "projectIntro": "Daily Rhythm / My Diary 是個人生活節奏與每日摘要系統。\n\n定位：\n不是嚴格打卡工具，而是把每天的狀態、學習、飲食、運動、生活事項收成一個輕量日記與回顧中心。\n\n核心架構：\n1. Today：記錄今天一句話、心情、節奏、運動、飲食、學習、小成就、Brain Dump。\n2. Summary：可同步 Food OS、Workout OS、Learning JSON、Other JSON，整理成今日摘要。\n3. Review：回顧最近 28 天的記錄密度、心情分佈、學習主題。\n4. Settings：管理預設選項、Prompt、資料同步與備份。\n\n使用方式：\n- 今天學了什麼 → 使用 Learning Summary Prompt。\n- 今天做了哪些生活雜事 → 使用 Other Summary Prompt。\n- Food / Workout → 從 Food OS / Workout OS 匯出今日 JSON 後貼進 Data Sync。\n- 每週或換裝置前 → 匯出全部 JSON 備份。",
+  "globalRules": "所有 Daily Rhythm 的 JSON 輸出都必須遵守：\n\n1. 使用 json code block 包裝輸出。\n2. 不要在 code block 外加入任何文字。\n3. 不要輸出解釋。\n4. code block 內必須是合法 JSON。\n5. JSON key 和 string value 必須使用雙引號。\n6. 不要使用註解。\n7. 不要使用 trailing comma。\n8. 數值必須是 number，不要把單位寫進數值。\n9. 若需要估算，請在該 item 加上 \"estimated\": true。\n10. 只有當使用者明確要求「純 JSON / 不要 markdown」時，才輸出裸 JSON。",
+  "learningSummary": "你是 Daily Rhythm 的 Learning Summary Parser。\n\n請將我今天的學習內容整理成 Diary 可匯入的 Learning JSON。\n\n輸出規則：\n1. 使用 json code block 包裝輸出。\n2. 不要在 code block 外加入任何文字。\n3. 不要輸出解釋。\n4. code block 內必須是合法 JSON。\n5. 格式必須是 {\"date\":\"YYYY-MM-DD\",\"learning\":[]}。\n6. learning 是 array，每個 item 必須包含 category 和 items。\n7. category 是大類，例如：泰文、英文、AI、程式、Marketing、閱讀、求職、其他。\n8. items 是 array，列出具體做了什麼。\n9. 不要把所有內容塞進同一類；請依主題精準分類。\n10. 若我沒有給日期，使用今天日期。\n11. 內容要保留細節，但不要寫成長篇心得。\n\n範例輸出：\n```json\n{\n  \"date\":\"2026-06-07\",\n  \"learning\":[\n    {\"category\":\"泰文\",\"items\":[\"Book 2 Ch2 課文內容\",\"整理 10 個生活句型\"]},\n    {\"category\":\"英文\",\"items\":[\"Shadowing 20 mins\",\"練習咖啡廳面試回答\"]}\n  ]\n}\n```",
+  "otherSummary": "你是 Daily Rhythm 的 Other Summary Parser。\n\n請將我今天除了飲食、運動、學習以外的生活事項整理成 Diary 可匯入的 Other JSON。\n\n輸出規則：\n1. 使用 json code block 包裝輸出。\n2. 不要在 code block 外加入任何文字。\n3. 不要輸出解釋。\n4. code block 內必須是合法 JSON。\n5. 格式必須是 {\"date\":\"YYYY-MM-DD\",\"other\":[]}。\n6. other 是 array，每個 item 必須包含 category 和 items。\n7. category 是生活類別，例如：保養、家務、社交、工作、出門、情緒整理、健康、休息、其他。\n8. items 是 array，列出具體做了什麼。\n9. 如果我說「刮痧按摩」，category 應該是「保養」，items 放「刮痧按摩」。\n10. 不要過度分類，但也不要全部塞進其他。\n11. 若我沒有給日期，使用今天日期。\n\n範例輸出：\n```json\n{\n  \"date\":\"2026-06-07\",\n  \"other\":[\n    {\"category\":\"保養\",\"items\":[\"刮痧按摩\"]},\n    {\"category\":\"家務\",\"items\":[\"整理房間\",\"洗衣服\"]}\n  ]\n}\n```"
+};
 const DEFAULTS = {
   entries: {},
   targets: "",
@@ -699,7 +762,8 @@ const DEFAULTS = {
     {e:"😁",l:"開心"},{e:"😊",l:"平靜"},{e:"🤩",l:"充實"},{e:"😐",l:"普通"},
     {e:"😔",l:"低落"},{e:"😰",l:"焦慮"},{e:"😫",l:"疲累"},{e:"🥲",l:"感恩"}
   ],
-  flowStates: ["很專注","普通","有點分心","完全失焦"]
+  flowStates: ["很專注","普通","有點分心","完全失焦"],
+  prompts: JSON.parse(JSON.stringify(DEFAULT_PROMPTS))
 };
 
 /* ═══ STORAGE ═══ */
@@ -718,6 +782,8 @@ function load(){
       DATA.learnTopics=[...DEFAULTS.learnTopics,...saved.customLearnTopics];
     if(saved.customExPresets&&!saved.exPresets)
       DATA.exPresets=[...DEFAULTS.exPresets,...saved.customExPresets];
+    if(!DATA.prompts)DATA.prompts=JSON.parse(JSON.stringify(DEFAULT_PROMPTS));
+    DATA.prompts=Object.assign(JSON.parse(JSON.stringify(DEFAULT_PROMPTS)), DATA.prompts||{});
   }catch(e){}
 }
 
@@ -1080,8 +1146,59 @@ const learnEditor = makeEditor('learnList', 'learnTopics', false);
 const moodEditor  = makeEditor('moodList',  'moods',       true);
 const flowEditor  = makeEditor('flowList',  'flowStates',  false);
 
+
+function renderGuidePrompts(){
+  if(!DATA.prompts)DATA.prompts=Object.assign({},DEFAULT_PROMPTS);
+  Object.keys(DEFAULT_PROMPTS).forEach(k=>{
+    const el=document.getElementById(`prompt_${k}`);
+    if(el && el.value !== (DATA.prompts[k]||"")) el.value=DATA.prompts[k]||"";
+  });
+}
+function setupPromptAutoSave(){
+  document.querySelectorAll("[data-prompt-key]").forEach(el=>{
+    el.addEventListener("input",()=>{
+      if(!DATA.prompts)DATA.prompts={};
+      DATA.prompts[el.dataset.promptKey]=el.value;
+      save();
+    });
+  });
+}
+
+function savePrompt(key){
+  if(!DATA.prompts)DATA.prompts={};
+  const el=document.getElementById(`prompt_${key}`); if(!el)return;
+  DATA.prompts[key]=el.value; save();
+  const msg=document.querySelector(`[data-prompt-msg="${CSS.escape(key)}"]`);
+  if(msg){msg.textContent="已儲存";setTimeout(()=>msg.textContent="",1200)}
+}
+function saveAllPromptText(){
+  if(!DATA.prompts)DATA.prompts={};
+  Object.keys(DEFAULT_PROMPTS).forEach(k=>{const el=document.getElementById(`prompt_${k}`); if(el)DATA.prompts[k]=el.value;});
+  save();
+  if(document.getElementById("promptGlobalMsg")){promptGlobalMsg.textContent="已儲存全部 Prompt";setTimeout(()=>promptGlobalMsg.textContent="",1400);}
+}
+function resetPrompt(key){
+  if(!DATA.prompts)DATA.prompts={};
+  DATA.prompts[key]=DEFAULT_PROMPTS[key];
+  const el=document.getElementById(`prompt_${key}`); if(el)el.value=DEFAULT_PROMPTS[key];
+  save();
+  const msg=document.querySelector(`[data-prompt-msg="${CSS.escape(key)}"]`);
+  if(msg){msg.textContent="已重置預設";setTimeout(()=>msg.textContent="",1200)}
+}
+function resetAllPrompts(){
+  DATA.prompts=JSON.parse(JSON.stringify(DEFAULT_PROMPTS));
+  save();renderGuidePrompts();
+  if(document.getElementById("promptGlobalMsg")){promptGlobalMsg.textContent="已重置全部預設";setTimeout(()=>promptGlobalMsg.textContent="",1400);}
+}
+function copyPrompt(key){
+  const el=document.getElementById(`prompt_${key}`); if(!el)return;
+  navigator.clipboard?.writeText(el.value);
+  const msg=document.querySelector(`[data-prompt-msg="${CSS.escape(key)}"]`);
+  if(msg){msg.textContent="已複製";setTimeout(()=>msg.textContent="",1200)}
+}
+
 function renderSettings(){
-  exEditor.render();learnEditor.render();moodEditor.render();flowEditor.render();renderSummaryViews();
+  exEditor.render();learnEditor.render();moodEditor.render();flowEditor.render();renderSummaryViews();renderGuidePrompts();
 }
 
 /* ═══ EVENTS ═══ */
@@ -1240,6 +1357,18 @@ document.querySelectorAll('.sc-head').forEach(h=>h.onclick=()=>{
   document.getElementById(h.dataset.acc)?.classList.toggle("open");
 });
 
+
+// prompt editor buttons
+if(document.body){
+  document.body.addEventListener("click",e=>{
+    const sp=e.target.closest("[data-save-prompt]"); if(sp){savePrompt(sp.dataset.savePrompt);return;}
+    const rp=e.target.closest("[data-reset-prompt]"); if(rp){resetPrompt(rp.dataset.resetPrompt);return;}
+    const cp=e.target.closest("[data-copy-prompt]"); if(cp){copyPrompt(cp.dataset.copyPrompt);return;}
+  });
+}
+if(document.getElementById("saveAllPrompts")) document.getElementById("saveAllPrompts").onclick=()=>saveAllPromptText();
+if(document.getElementById("resetAllPrompts")) document.getElementById("resetAllPrompts").onclick=()=>{if(confirm("確定重置全部 Prompt 為內建預設嗎？"))resetAllPrompts();};
+
 // settings – targets
 document.getElementById("saveTargets").onclick=()=>{DATA.targets=document.getElementById("targets").value.trim();save();flash("tSaved");};
 
@@ -1323,7 +1452,7 @@ document.getElementById("importConfirm").onclick=()=>{
 };
 document.getElementById("reset").onclick=()=>{
   if(confirm("確定清空全部紀錄嗎？建議先備份。")){
-    const preserve={exPresets:DATA.exPresets,learnTopics:DATA.learnTopics,moods:DATA.moods,flowStates:DATA.flowStates,targets:DATA.targets};
+    const preserve={exPresets:DATA.exPresets,learnTopics:DATA.learnTopics,moods:DATA.moods,flowStates:DATA.flowStates,targets:DATA.targets,prompts:DATA.prompts};
     DATA=Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),preserve,{entries:{}});
     save();renderSettings();renderToday();
   }
@@ -1331,6 +1460,7 @@ document.getElementById("reset").onclick=()=>{
 
 /* ═══ INIT ═══ */
 load();
+setupPromptAutoSave();
 document.getElementById("targets").value=DATA.targets||"";
 renderToday();
 </script>
