@@ -204,6 +204,82 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
   .quickControls{grid-template-columns:1fr}
 }
 
+
+/* Food OS v1.6.1：常用份量設定 */
+.servingEditor{
+  display:grid;
+  grid-template-columns:1fr 92px auto;
+  gap:7px;
+  margin-top:10px;
+  align-items:center;
+}
+.servingEditor input,.servingEditor select{
+  border:1px solid var(--line);
+  background:#fffdf9;
+  border-radius:12px;
+  padding:9px 10px;
+  font-size:.84rem;
+}
+.servingEditor button{
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--ink);
+  border-radius:12px;
+  padding:9px 12px;
+  font-family:inherit;
+  font-size:.82rem;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.servingEditor button:hover{border-color:var(--sage);color:var(--sage)}
+.servingSaved{
+  color:var(--sage);
+  font-size:.72rem;
+  margin-top:5px;
+  min-height:1em;
+}
+@media(max-width:520px){
+  .servingEditor{grid-template-columns:1fr}
+}
+
+
+/* Food OS v1.6.1.1：分類快速加入操作穩定版 */
+.quickItem{
+  position:relative;
+}
+.quickItem .topline{
+  align-items:flex-start;
+}
+.quickControls{
+  grid-template-columns:minmax(72px,1fr) 92px 72px;
+}
+.quickControls input,
+.quickControls select,
+.quickControls button{
+  min-height:40px;
+}
+.quickMsg{
+  margin-top:7px;
+  min-height:1em;
+  font-size:.74rem;
+  color:var(--sage);
+}
+.quickAddFlash{
+  animation:quickFlash .45s ease;
+}
+@keyframes quickFlash{
+  from{box-shadow:0 0 0 3px rgba(126,144,114,.18)}
+  to{box-shadow:none}
+}
+@media(max-width:420px){
+  .quickControls{
+    grid-template-columns:1fr 1fr;
+  }
+  .quickControls button{
+    grid-column:1 / -1;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -211,7 +287,7 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
 <header>
   <div class="kicker">personal fitness os</div>
   <h1>Food OS</h1>
-  <div class="sub">個人食材資料庫 + 每日飲食紀錄 + 常用收藏 + 檔案備份。</div>
+  <div class="sub">個人食材資料庫 + 每日飲食紀錄 + 常用收藏 + 常用份量 + 檔案備份。</div>
 </header>
 
 <nav>
@@ -420,7 +496,9 @@ Personal Fitness OS / Food OS 專案說明：
 3. Combo Database：常吃且固定份量的餐點組合，例如優格組。
 4. Daily Logs：每日飲食紀錄使用 date 儲存，格式為 {"date":"YYYY-MM-DD","food":[]}。
 5. Custom Foods：外食、新食物、聚餐不需建檔，使用 custom + nutrition 記錄。
-6. Backup System：支援匯出今日與匯出全部資料，避免 localStorage 資料遺失。\n7. Favorites：常用食材會跟著備份匯出，可在食材庫用 ⭐ 收藏 / 取消收藏。
+6. Backup System：支援匯出今日與匯出全部資料，避免 localStorage 資料遺失。
+7. Favorites：常用食材會跟著備份匯出，可在食材庫用 ⭐ 收藏 / 取消收藏。
+8. Default Servings：常用份量由系統內的 servings 管理，分類快速加入會自動套用常用份量。
 
 AI 使用方式：
 A. 今天吃了什麼 → 使用「🍱 Daily Food Parser」輸出 Daily Log JSON。
@@ -451,7 +529,9 @@ C. 固定早餐 / 優格組 / 訓練前餐 → 使用「🌟 Combo Generator」�
 8. 數值必須是 number，不要把單位寫進數值。
 9. 若需要估算，請在該 item 加上 "estimated": true。
 10. Daily Food Log 使用 {"date":"YYYY-MM-DD","food":[]}。
-11. 輸出必須可直接貼進 Food OS。
+11. Food Database JSON 只描述食材本身；是否加入常用、常用份量可在 Food OS 內設定。
+12. favorites、usageStats、servings 是系統備份資料，不是每日飲食 JSON 必填欄位。
+13. 輸出必須可直接貼進 Food OS。
     </textarea>
   </div>
 
@@ -476,6 +556,8 @@ C. 固定早餐 / 優格組 / 訓練前餐 → 使用「🌟 Combo Generator」�
 10. 固體使用 gram；液體使用 ml；雞蛋等天然單位食物可使用 qty。
 11. 若份量不明，請用合理估算並加上 "estimated": true。
 12. 若無法估算，請不要亂填，改用 custom 並在名稱中標註「估算不足」。
+13. 常用食材仍然只用 food，不要因為是常用就改格式。
+14. favorites、usageStats、servings 不屬於 Daily Food Log，請不要放進每日飲食 JSON。
 
 Food Database 常見名稱：
 雞里肌、雞胸肉、大雞蛋、蝦仁、無糖豆漿、蛋白粉、Kirkland希臘優格、質立希臘式優格、白飯、燕麥、香蕉、藍莓、高麗菜、地瓜、板豆腐、嫩豆腐、鮭魚、鯛魚、優格組。
@@ -512,6 +594,8 @@ Food Database 常見名稱：
 9. category 是可擴展的自由字串。
 10. 優先使用既有 category；若不適合，可建立合理的新 category。
 11. 數值使用 number，不要加單位文字。
+12. Food Database JSON 只負責食材資料，不要輸出 favorites 或 usageStats。
+13. 若知道常用份量，可加入 defaultServing，例如 {"unit":"gram","amount":53}；若不知道可省略，由 Food OS 內設定。
 
 建議 category：
 protein, carbs, fruit, vegetable, fat, drink, snack, dessert, supplement, sauce, other
@@ -526,7 +610,8 @@ protein, carbs, fruit, vegetable, fat, drink, snack, dessert, supplement, sauce,
     "protein":0,
     "carbs":0,
     "fat":0
-  }
+  },
+  "defaultServing":{"unit":"gram","amount":53}
 }
     </textarea>
   </div>
@@ -583,7 +668,8 @@ protein, carbs, fruit, vegetable, fat, drink, snack, dessert, supplement, sauce,
 </div>
 
 <script>
-const KEY="food_os_v1";
+const KEY="food_os_v16";
+const OLD_KEY="food_os_v1";
 const DEFAULT_FOODS=[
   {"name":"雞里肌","category":"protein","unit":"100g","nutrition":{"calories":110,"protein":22,"carbs":0,"fat":1.5}},
   {"name":"雞胸肉","category":"protein","unit":"100g","nutrition":{"calories":110,"protein":23,"carbs":0,"fat":1.5}},
@@ -661,7 +747,7 @@ const ALIASES={
   "乳清":"蛋白粉","蛋白":"蛋白粉","飯":"白飯","白飯半碗":"白飯",
   "穀片":"蛋白質綜合穀片","蛋白穀片":"蛋白質綜合穀片"
 };
-let DATA={foods:DEFAULT_FOODS,combos:DEFAULT_COMBOS,entries:{},settings:{calories:1300,protein:105,carbs:90,fat:45},favorites:["優格組","大雞蛋","雞里肌","雞胸肉","無糖豆漿","蛋白粉","白飯","燕麥","香蕉","高麗菜"],usageStats:{}};
+let DATA={foods:DEFAULT_FOODS,combos:DEFAULT_COMBOS,entries:{},settings:{calories:1300,protein:105,carbs:90,fat:45},favorites:["優格組","大雞蛋","雞里肌","雞胸肉","無糖豆漿","蛋白粉","白飯","燕麥","香蕉","高麗菜"],usageStats:{},servings:DEFAULT_SERVINGS};
 let cur=ymd(new Date());
 function ymd(d){return d.toISOString().slice(0,10)}
 function parseYmd(s){const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)}
@@ -672,11 +758,14 @@ function fmtNum(n){n=Number(n)||0;return Number.isInteger(n)?String(n):n.toFixed
 function save(){localStorage.setItem(KEY,JSON.stringify(DATA))}
 function load(){
   try{
-    const v=localStorage.getItem(KEY);
+    const v=localStorage.getItem(KEY)||localStorage.getItem(OLD_KEY);
     if(v)DATA=Object.assign(DATA,JSON.parse(v));
   }catch(e){}
   if(!Array.isArray(DATA.favorites))DATA.favorites=["優格組","大雞蛋","雞里肌","雞胸肉","無糖豆漿","蛋白粉","白飯","燕麥","香蕉","高麗菜"];
   if(!DATA.usageStats)DATA.usageStats={};
+  if(!DATA.servings)DATA.servings=JSON.parse(JSON.stringify(DEFAULT_SERVINGS));
+  if(!DATA.servings["晨間里肌燒肉"])DATA.servings["晨間里肌燒肉"]=[{label:"1份 53g","gram":53}];
+  if((DATA.foods||[]).some(f=>f.name==="晨間里肌燒肉") && !DATA.favorites.includes("晨間里肌燒肉"))DATA.favorites.push("晨間里肌燒肉");
 }
 function downloadJSON(filename,data){
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
@@ -702,6 +791,7 @@ function importFoodBackup(raw){
   if(raw.settings)DATA.settings=raw.settings;
   if(raw.favorites)DATA.favorites=raw.favorites;
   if(raw.usageStats)DATA.usageStats=raw.usageStats;
+  if(raw.servings)DATA.servings=raw.servings;
   if(raw.entries)DATA.entries=raw.entries;
   if(raw.logs){
     DATA.entries={};
@@ -725,6 +815,22 @@ function bumpUsage(name){
   name=standardName(name);
   if(!DATA.usageStats)DATA.usageStats={};
   DATA.usageStats[name]=(DATA.usageStats[name]||0)+1;
+}
+function getServings(name){
+  name=standardName(name);
+  return (DATA.servings&&DATA.servings[name]) || DEFAULT_SERVINGS[name] || [];
+}
+function setDefaultServing(name,unit,amount){
+  name=standardName(name);
+  amount=Number(amount)||1;
+  if(!DATA.servings)DATA.servings={};
+  const label=unit==="gram"?`1份 ${amount}g`:unit==="ml"?`1份 ${amount}ml`:`1份 ${amount}顆/份`;
+  const row={label};
+  if(unit==="gram")row.gram=amount;
+  if(unit==="ml")row.ml=amount;
+  if(unit==="qty")row.qty=amount;
+  DATA.servings[name]=[row];
+  save();renderAll();
 }
 function calcOne(log){
   const fmap=foodsMap(), cmap=combosMap();
@@ -762,13 +868,20 @@ function totalNutrition(){
   E().forEach(log=>{const c=calcOne(log);["calories","protein","carbs","fat"].forEach(k=>t[k]+=c[k])});
   return t;
 }
-function addFoodLog(food,unit,amount){
+function addFoodLog(food,unit,amount,soft=false){
   const name=standardName(food);
   const log={food:name};
   if(unit==="gram") log.gram=Number(amount);
   if(unit==="ml") log.ml=Number(amount);
   if(unit==="qty") log.qty=Number(amount);
-  E().push(log); bumpUsage(name); save(); renderAll();
+  E().push(log); bumpUsage(name); save();
+  if(soft){
+    renderMetrics();
+    renderLogs();
+    renderHistory();
+  }else{
+    renderAll();
+  }
 }
 function importLogs(input){
   let targetDate=cur;
@@ -832,7 +945,7 @@ function allFoodNames(){
 function unitDefaultFor(name){
   const f=foodsMap()[name], c=combosMap()[name];
   if(c) return {unit:"qty", amount:1};
-  const s=DEFAULT_SERVINGS[name]||[];
+  const s=getServings(name);
   if(s[0]){
     if(s[0].gram) return {unit:"gram", amount:s[0].gram};
     if(s[0].ml) return {unit:"ml", amount:s[0].ml};
@@ -843,7 +956,7 @@ function unitDefaultFor(name){
   return {unit:"qty", amount:1};
 }
 function servingText(name){
-  const f=foodsMap()[name], c=combosMap()[name], s=DEFAULT_SERVINGS[name]||[];
+  const f=foodsMap()[name], c=combosMap()[name], s=getServings(name);
   if(c) return `組合：${c.items.map(i=>`${i.food}${i.gram?i.gram+"g":i.ml?i.ml+"ml":i.qty+"份"}`).join(" + ")}`;
   if(f) return `資料庫單位：${f.unit}${f.weight?`｜1顆約 ${f.weight}g`:""}｜常用份量：${s.map(x=>x.label).join("、")||"無"}`;
   return "";
@@ -885,7 +998,7 @@ function renderQuickAddGroups(){
             const d=unitDefaultFor(n);
             const info=servingText(n);
             const usage=DATA.usageStats?.[n]?`｜已用 ${DATA.usageStats[n]} 次`:"";
-            return `<div class="itemcard">
+            return `<div class="itemcard quickItem" data-quick-card="${esc(n)}">
               <div class="topline">
                 <div>
                   <div class="n">${esc(n)}</div>
@@ -894,14 +1007,15 @@ function renderQuickAddGroups(){
                 <button class="starbtn ${isFavorite(n)?"on":""}" data-fav-food="${esc(n)}">${isFavorite(n)?"★ 常用":"☆ 加常用"}</button>
               </div>
               <div class="quickControls">
-                <input data-quick-amount="${esc(n)}" type="number" min="0" step="1" value="${esc(d.amount)}" aria-label="份量">
-                <select data-quick-unit="${esc(n)}" aria-label="單位">
+                <input class="quickAmount" type="number" min="0" step="1" value="${esc(d.amount)}" aria-label="份量">
+                <select class="quickUnit" aria-label="單位">
                   <option value="gram" ${d.unit==="gram"?"selected":""}>g</option>
                   <option value="ml" ${d.unit==="ml"?"selected":""}>ml</option>
                   <option value="qty" ${d.unit==="qty"?"selected":""}>顆/份</option>
                 </select>
-                <button data-quick-add="${esc(n)}">加入</button>
+                <button class="quickAddBtn" data-quick-add="${esc(n)}">加入</button>
               </div>
+              <div class="quickMsg"></div>
             </div>`;
           }).join("")}
         </div>
@@ -913,6 +1027,18 @@ function renderDB(){
   const cats={protein:"🥩 Protein",carbs:"🍚 Carbs",fruit:"🍓 Fruit",vegetable:"🥬 Vegetable",fat:"🥑 Fats / Others",other:"📦 Others"};
   const grouped={};
   DATA.foods.forEach(f=>{const k=f.category||"other"; if(!grouped[k])grouped[k]=[]; grouped[k].push(f)});
+  const servingEditor=(name)=>{
+    const d=unitDefaultFor(name);
+    return `<div class="servingEditor">
+      <input data-serving-amount="${esc(name)}" type="number" min="0" step="1" value="${esc(d.amount)}" aria-label="常用份量">
+      <select data-serving-unit="${esc(name)}" aria-label="常用單位">
+        <option value="gram" ${d.unit==="gram"?"selected":""}>g</option>
+        <option value="ml" ${d.unit==="ml"?"selected":""}>ml</option>
+        <option value="qty" ${d.unit==="qty"?"selected":""}>顆/份</option>
+      </select>
+      <button data-save-serving="${esc(name)}">儲存份量</button>
+    </div><div class="servingSaved" data-serving-msg="${esc(name)}"></div>`;
+  };
   dbList.innerHTML=Object.entries(grouped).map(([cat,items])=>`
     <div class="group open">
       <button class="grouphead" data-toggle><span><b>${cats[cat]||cat}</b><small>${items.length} 個食材</small></span><span>▼</span></button>
@@ -921,9 +1047,11 @@ function renderDB(){
           <div>
             <div class="n">${esc(f.name)}</div>
             <div class="m">${esc(f.unit)}｜${fmtNum(f.nutrition.calories)} kcal｜P ${fmtNum(f.nutrition.protein)} C ${fmtNum(f.nutrition.carbs)} F ${fmtNum(f.nutrition.fat)}${DATA.usageStats?.[f.name]?`｜已用 ${DATA.usageStats[f.name]} 次`:""}</div>
+            <div class="m">常用份量：${esc(servingText(f.name).replace(/^資料庫單位：.*?｜常用份量：/,""))}</div>
           </div>
           <button class="starbtn ${isFavorite(f.name)?"on":""}" data-fav-food="${esc(f.name)}">${isFavorite(f.name)?"★ 常用":"☆ 加常用"}</button>
         </div>
+        ${servingEditor(f.name)}
       </div>`).join("")}</div></div>
     </div>`).join("") + `
     <div class="group open"><button class="grouphead" data-toggle><span><b>🌟 Combo</b><small>${(DATA.combos||[]).length} 個組合</small></span><span>▼</span></button>
@@ -932,9 +1060,11 @@ function renderDB(){
         <div>
           <div class="n">${esc(c.name)}</div>
           <div class="m">${c.items.map(i=>`${i.food}${i.gram?i.gram+"g":i.ml?i.ml+"ml":i.qty+"份"}`).join(" + ")}${DATA.usageStats?.[c.name]?`｜已用 ${DATA.usageStats[c.name]} 次`:""}</div>
+          <div class="m">常用份量：${esc(servingText(c.name).replace(/^組合：/,""))}</div>
         </div>
         <button class="starbtn ${isFavorite(c.name)?"on":""}" data-fav-food="${esc(c.name)}">${isFavorite(c.name)?"★ 常用":"☆ 加常用"}</button>
       </div>
+      ${servingEditor(c.name)}
     </div>`).join("")}</div></div></div>`;
 }
 function renderSettings(){
@@ -951,12 +1081,34 @@ document.body.addEventListener("click",e=>{
   const hd=e.target.closest("[data-history-date]"); if(hd){cur=hd.dataset.historyDate;document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));document.querySelector('nav button[data-tab="dash"]').classList.add("on");document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));document.getElementById("dash").classList.add("on");renderAll();return}
   const tog=e.target.closest("[data-toggle]"); if(tog){tog.closest(".group").classList.toggle("open");return}
   const fav=e.target.closest("[data-fav-food]"); if(fav){setFavorite(fav.dataset.favFood,!isFavorite(fav.dataset.favFood));return}
+  const sv=e.target.closest("[data-save-serving]"); if(sv){
+    const name=sv.dataset.saveServing;
+    const amount=document.querySelector(`[data-serving-amount="${CSS.escape(name)}"]`)?.value||1;
+    const unit=document.querySelector(`[data-serving-unit="${CSS.escape(name)}"]`)?.value||unitDefaultFor(name).unit;
+    setDefaultServing(name,unit,amount);
+    const msg=document.querySelector(`[data-serving-msg="${CSS.escape(name)}"]`);
+    if(msg)msg.textContent="已儲存常用份量";
+    return
+  }
   const s=e.target.closest("[data-serving-food]"); if(s){addFoodLog(s.dataset.servingFood,s.dataset.unit,s.dataset.amount);return}
   const qa=e.target.closest("[data-quick-add]"); if(qa){
+    const card=qa.closest(".quickItem");
     const name=qa.dataset.quickAdd;
-    const amount=document.querySelector(`[data-quick-amount="${CSS.escape(name)}"]`)?.value||1;
-    const unit=document.querySelector(`[data-quick-unit="${CSS.escape(name)}"]`)?.value||unitDefaultFor(name).unit;
-    addFoodLog(name,unit,amount);return
+    const amount=card?.querySelector(".quickAmount")?.value||1;
+    const unit=card?.querySelector(".quickUnit")?.value||unitDefaultFor(name).unit;
+    addFoodLog(name,unit,amount,true);
+    if(card){
+      card.classList.remove("quickAddFlash");
+      void card.offsetWidth;
+      card.classList.add("quickAddFlash");
+      const msg=card.querySelector(".quickMsg");
+      if(msg){
+        const unitLabel=unit==="gram"?"g":unit==="ml"?"ml":"顆/份";
+        msg.textContent=`已加入：${amount} ${unitLabel}`;
+        setTimeout(()=>{msg.textContent=""},1400);
+      }
+    }
+    return
   }
   const x=e.target.closest(".x"); if(x){E().splice(+x.dataset.i,1);save();renderAll();return}
 });
@@ -994,13 +1146,21 @@ importFoodDb.onclick=()=>{
       if(!f.name||!f.nutrition)return;
       const idx=DATA.foods.findIndex(x=>x.name===f.name);
       if(idx>=0)DATA.foods[idx]=f; else DATA.foods.push(f);
+      const ds=f.defaultServing||f.serving||null;
+      if(ds){
+        const unit=ds.unit||("gram" in ds?"gram":"ml" in ds?"ml":"qty");
+        const amount=ds.amount||ds.gram||ds.ml||ds.qty||1;
+        setDefaultServing(f.name,unit,amount);
+      }else if(f.name==="晨間里肌燒肉"){
+        setDefaultServing(f.name,"gram",53);
+      }
       if(addFav && !isFavorite(f.name))DATA.favorites.push(f.name);
       n++;
     });
     save();renderAll();foodDbMsg.textContent=`已新增/更新 ${n} 筆食材${addFav?"，並加入常用":""}`;
   }catch(e){foodDbMsg.textContent="JSON 格式錯誤"}
 };
-exportFoodDb.onclick=()=>{downloadJSON(`FoodOS_food_database_${ymd(new Date())}.json`,{foods:DATA.foods,combos:DATA.combos,favorites:DATA.favorites,usageStats:DATA.usageStats});foodDbMsg.textContent="已下載食材資料庫 JSON 檔"};
+exportFoodDb.onclick=()=>{downloadJSON(`FoodOS_food_database_${ymd(new Date())}.json`,{foods:DATA.foods,combos:DATA.combos,favorites:DATA.favorites,usageStats:DATA.usageStats,servings:DATA.servings});foodDbMsg.textContent="已下載食材資料庫 JSON 檔"};
 clearFoodDbJson.onclick=()=>{foodDbJson.value="";foodDbMsg.textContent=""};
 saveSettings.onclick=()=>{DATA.settings={calories:+targetCalories.value||1300,protein:+targetProtein.value||105,carbs:+targetCarbs.value||90,fat:+targetFat.value||45};save();saved.classList.add("show");setTimeout(()=>saved.classList.remove("show"),1200);renderAll()};
 reset.onclick=()=>{if(confirm("確定清空所有 Food OS 資料？")){localStorage.removeItem(KEY);location.reload()}};
@@ -1015,17 +1175,18 @@ exportCombos.onclick=()=>{downloadJSON(`FoodOS_combos_${ymd(new Date())}.json`,D
 clearComboJson.onclick=()=>{comboJson.value="";comboMsg.textContent=""};
 if(document.getElementById("foodSelect")){
   foodSelect.addEventListener("change",updateGlobalServingHint);
-  document.getElementById("addLog").onclick=()=>addFoodLog(foodSelect.value,unitSelect.value,amountInput.value||1);
+  document.getElementById("addLog").onclick=()=>addFoodLog(foodSelect.value,unitSelect.value,amountInput.value||1,false);
 }
 
 function exportAllBackup(){
   return {
-    version:"1.5",
+    version:"1.6.1",
     exportedAt:new Date().toISOString(),
     foods:DATA.foods,
     combos:DATA.combos,
     favorites:DATA.favorites,
     usageStats:DATA.usageStats,
+    servings:DATA.servings,
     settings:DATA.settings,
     logs:Object.entries(DATA.entries||{}).sort(([a],[b])=>a.localeCompare(b)).map(([date,food])=>({date,food}))
   };
