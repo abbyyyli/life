@@ -265,6 +265,69 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
   }
 }
 
+
+/* Current Week selector editor */
+.week-select-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  align-items:center;
+  margin-bottom:10px;
+}
+.week-select-row select{
+  min-height:40px;
+  border:1px solid var(--line);
+  background:#fffdf9;
+  border-radius:14px;
+  padding:9px 10px;
+  font-size:.86rem;
+}
+.week-select-row button{
+  border:none;
+  background:var(--sage);
+  color:#fff;
+  border-radius:12px;
+  padding:9px 12px;
+  font-family:inherit;
+  font-size:.82rem;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.week-plan-pills{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  min-height:32px;
+}
+.week-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:var(--sage-soft);
+  border:1px solid #d8e2cb;
+  color:#4d5942;
+  border-radius:999px;
+  padding:6px 9px;
+  font-size:.78rem;
+}
+.week-pill.rest{
+  background:#fff7ed;
+  border-color:var(--sand);
+  color:#7a4f34;
+}
+.week-pill button{
+  border:none;
+  background:transparent;
+  color:inherit;
+  cursor:pointer;
+  font-size:.82rem;
+  line-height:1;
+  padding:0 1px;
+}
+@media(max-width:520px){
+  .week-select-row{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -296,7 +359,7 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
         <div class="heroTitle">本週訓練 Dashboard</div>
         <div class="heroSub">看趨勢，不看單日。重點是知道這週哪裡練到了、哪裡需要調整。</div>
       </div>
-      <div class="badge">v1.2.1</div>
+      <div class="badge">v2.0</div>
     </div>
     <div class="grid4" id="metricGrid"></div>
     <div class="note" id="dashNote"></div>
@@ -324,7 +387,7 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
 <section class="panel" id="week">
   <div class="card">
     <h2>Current Week｜本週課表</h2>
-    <div class="hint">每週可以調整這裡；Templates 是原始課表庫，不需要一直覆蓋。</div>
+    <div class="hint">每週可以在這裡用選單調整課表；Templates 是原始課表庫，不需要一直覆蓋。</div>
     <div id="weekEditor"></div>
     <button class="btn" id="saveWeek">儲存本週課表<span class="saved" id="weekSaved">已儲存</span></button>
   </div>
@@ -436,6 +499,59 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
       <div class="jsonmsg" id="importMsg"></div>
     </div>
   </div>
+
+  <div class="card">
+    <h2>Program / Current Week Import</h2>
+    <div class="hint">貼上我幫你輸出的 Program JSON，可更新本週課表，也可以一起更新 Templates 與 Exercise Library。這是「課表匯入」，不是訓練紀錄匯入。</div>
+    <details class="note">
+      <summary style="cursor:pointer;font-weight:700;color:var(--clay)">Program Import JSON 格式</summary>
+      <textarea rows="12" readonly>{
+  "currentWeek":[
+    {"day":"週一","plan":["臀腿A","Core A"]},
+    {"day":"週二","plan":["肩背A"]},
+    {"day":"週三","plan":["Rest"]},
+    {"day":"週四","plan":["臀腿B","Core B"]},
+    {"day":"週五","plan":["肩背B"]},
+    {"day":"週六","plan":["臀腿C","Core A"]},
+    {"day":"週日","plan":["Rest"]}
+  ],
+  "templates":[
+    {
+      "name":"臀腿A-2",
+      "focus":"臀推變化",
+      "tags":["臀","腿"],
+      "exercises":[
+        ["槓鈴臀推","4","8-10"],
+        ["RDL","4","10-12"],
+        ["Step Up","3","每邊8-10"],
+        ["臀外展","3","15-20"]
+      ]
+    }
+  ],
+  "exerciseLibrary":[]
+}</textarea>
+    </details>
+    <div class="jsonbox">
+      <label style="margin-top:0">貼上 Program JSON</label>
+      <textarea id="programJson" placeholder='{
+  "currentWeek":[
+    {"day":"週一","plan":["臀腿A","Core A"]},
+    {"day":"週二","plan":["肩背A"]},
+    {"day":"週三","plan":["Rest"]},
+    {"day":"週四","plan":["臀腿B","Core B"]},
+    {"day":"週五","plan":["肩背B"]},
+    {"day":"週六","plan":["臀腿C","Core A"]},
+    {"day":"週日","plan":["Rest"]}
+  ]
+}'></textarea>
+      <div class="jsonbar">
+        <button class="primary" id="importProgramJson">匯入 Program / Current Week</button>
+        <button id="exportProgramJson">匯出目前課表檔案</button>
+        <button id="clearProgramJson">清空</button>
+      </div>
+      <div class="jsonmsg" id="programMsg"></div>
+    </div>
+  </div>
 </section>
 
 <section class="panel" id="progress">
@@ -469,53 +585,391 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
 
 <section class="panel" id="guide">
   <div class="card">
-    <h2>Project Intro</h2>
-    <textarea rows="16" readonly>Workout Coach OS 是 Personal Fitness OS 的訓練教練系統。
+    <h2>Guide & Prompts</h2>
+    <div class="hint">這裡是可編輯 Prompt Library。內容會自動儲存在 Workout OS，並跟全部備份一起匯出。</div>
+  </div>
+  <div class="card prompt-card">
+    <h2>📖 Project Intro｜專案介紹</h2>
+    <div class="hint">未來開新對話時，可以先貼這段，讓 AI 知道 Workout OS 的定位與資料結構。</div>
+    <textarea id="prompt_projectIntro" rows="18" data-prompt-key="projectIntro">Workout Coach OS 是 Personal Fitness OS 的訓練教練系統。
 
 定位：
 不是 Hevy 替代品，不是純記錄器，而是「課表 + 教練回顧 + 進度整理」。
 
 核心架構：
 1. Exercise Library：固定動作資料庫。
-2. Workout Templates：預設課表庫，例如臀腿A/B/C、肩背A/B、Core A/B。
-3. Current Week：本週實際執行課表，每週可調整。
-4. Workout Logs：訓練紀錄，可由 Hevy 截圖轉 JSON 匯入。
-5. Coach Notes：太難、不舒服、沒感覺、想替換的紀錄。
-6. Progress：完成率、肌群頻率、重量進步。
+2. Workout Templates：預設課表庫，例如臀腿A/B/C、肩背A/B、Core A/B，也可以新增臀腿A-2、肩背C、Core C 等變化版。
+3. Current Week：本週實際執行課表，每週可調整，也可用 Program / Current Week Import 一鍵匯入。
+4. Program Import：貼上 Program JSON，可更新 currentWeek，也可以一起更新 templates 與 exerciseLibrary。
+5. Workout Logs：訓練紀錄，可由 Hevy 截圖轉 JSON 匯入。
+6. Coach Notes：太難、不舒服、沒感覺、想替換的紀錄。
+7. Progress：完成率、肌群頻率、重量進步。
 
 使用方式：
 - 今天要練什麼 → 看 Today。
-- 用 Hevy 記錄 → 截圖丟給 AI 轉 JSON → Import。
-- 每週檢查 → Weekly Review / Coach Notes → 下週調整 Current Week。</textarea>
+- 用 Hevy 記錄 → 截圖丟給 AI 轉 JSON → Workout Import。
+- 想換下週課表 → 用 Program Generator Prompt 請 AI 輸出 Program JSON → Program / Current Week Import。
+- 每週檢查 → History / Progress / Coach Notes → 產生下一週 Program JSON。</textarea>
   </div>
-  <div class="card">
-    <h2>Weekly Review Prompt</h2>
-    <textarea rows="10" readonly>請根據以下 Workout Coach OS 資料，幫我做週回顧並建議下週課表調整。
+  <div class="card prompt-card">
+    <h2>🧱 JSON Robustness Rules</h2>
+    <div class="hint">所有 Workout prompt 共用的輸出規則，避免 AI 輸出壞掉。</div>
+    <textarea id="prompt_globalRules" rows="13" data-prompt-key="globalRules">所有 Workout Coach OS 的 JSON 輸出都必須遵守：
+
+1. 使用 json code block 包裝輸出。
+2. 不要在 code block 外加入任何文字。
+3. 不要輸出解釋。
+4. code block 內必須是合法 JSON。
+5. JSON key 和 string value 必須使用雙引號。
+6. 不要使用註解。
+7. 不要使用 trailing comma。
+8. 數值使用 number；沒有重量可用 null。
+9. 若是估算或看不清楚，請加入 "estimated": true。
+10. 只有當使用者明確要求「純 JSON / 不要 markdown」時，才輸出裸 JSON。</textarea>
+  </div>
+  <div class="card prompt-card">
+    <h2>🏋️ Program Generator｜生成下一週課表</h2>
+    <div class="hint">根據器材、目標、History、Progress、Coach Notes 生成可匯入的 Program JSON。</div>
+    <textarea id="prompt_programGenerator" rows="24" data-prompt-key="programGenerator">請根據以下 Workout Coach OS 資料，幫我產生下一週可匯入的 Program JSON。
+
+使用者條件：
+- 女生，150cm，小基數高體脂
+- 目標：增肌減脂、臀腿線條、肩背線條、核心穩定
+- 器材：啞鈴、小槓鈴最高約 30kg、臀圈、彈力帶、滑步機
+- 每週可訓練 4–5 天
+- 不喜歡跑步，有氧偏好滑步機
+- 保加利亞蹲容易膝蓋不舒服，除非明確安全替代，不要設為主力
+
+請參考：
+1. 最近 2–4 週 Workout Logs
+2. Progress
+3. Coach Notes
+4. Exercise Library
+5. 目前 Current Week
+
+課表規則：
+1. 保留 60–80% 已熟悉且有效的動作。
+2. 加入 20–40% 合理變化動作。
+3. 不要每週完全推翻；以可追蹤進步為主。
+4. 避免高風險膝蓋動作與使用者標記不舒服的動作。
+5. 若新增 Template，名稱請使用「臀腿A-2」「肩背C」「Core C」這類清楚名稱。
+6. 若新增 Exercise Library 動作，請一起放進 exerciseLibrary。
+7. 可輸出 currentWeek + templates + exerciseLibrary。
+8. 如果只需要調整本週，至少輸出 currentWeek。
+
+輸出規則：
+1. 使用 json code block 包裝輸出。
+2. 不要在 code block 外加入任何文字。
+3. 不要輸出解釋。
+4. code block 內必須是合法 JSON。
+5. JSON key 和 string value 必須使用雙引號。
+6. 不要使用註解或 trailing comma。
+
+輸出格式：
+```json
+{
+  "currentWeek":[
+    {"day":"週一","plan":["臀腿A-2","Core A"]},
+    {"day":"週二","plan":["肩背A"]},
+    {"day":"週三","plan":["Rest"]},
+    {"day":"週四","plan":["臀腿B","Core B"]},
+    {"day":"週五","plan":["肩背B"]},
+    {"day":"週六","plan":["臀腿C","Core A"]},
+    {"day":"週日","plan":["Rest"]}
+  ],
+  "templates":[
+    {
+      "name":"臀腿A-2",
+      "focus":"臀推變化",
+      "tags":["臀","腿"],
+      "exercises":[
+        ["槓鈴臀推","4","8-10"],
+        ["RDL","4","10-12"],
+        ["Step Up","3","每邊8-10"],
+        ["臀外展","3","15-20"]
+      ]
+    }
+  ],
+  "exerciseLibrary":[]
+}
+```</textarea>
+  </div>
+  <div class="card prompt-card">
+    <h2>🔄 Program Import Prompt｜可匯入課表格式</h2>
+    <div class="hint">讓 AI 直接輸出可貼進 Program / Current Week Import 的 JSON。</div>
+    <textarea id="prompt_programImport" rows="16" data-prompt-key="programImport">請輸出 Workout Coach OS 可匯入的 Program JSON。
+
+使用情境：
+我會把輸出的 JSON 貼到 Workout Coach OS 的「Program / Current Week Import」。
+
+輸出規則：
+1. 使用 json code block 包裝輸出。
+2. 不要在 code block 外加入任何文字。
+3. 不要輸出解釋。
+4. code block 內必須是合法 JSON。
+5. 如果只更新本週，輸出 currentWeek 即可。
+6. 如果有新增課表變化，請同時輸出 templates。
+7. 如果有新增動作資料，請同時輸出 exerciseLibrary。
+
+輸出格式：
+```json
+{
+  "currentWeek":[
+    {"day":"週一","plan":["臀腿A","Core A"]},
+    {"day":"週二","plan":["肩背A"]},
+    {"day":"週三","plan":["Rest"]},
+    {"day":"週四","plan":["臀腿B","Core B"]},
+    {"day":"週五","plan":["肩背B"]},
+    {"day":"週六","plan":["臀腿C","Core A"]},
+    {"day":"週日","plan":["Rest"]}
+  ]
+}
+```</textarea>
+  </div>
+  <div class="card prompt-card">
+    <h2>📅 Current Week Generator｜只更新本週</h2>
+    <div class="hint">只想換本週安排、不新增課表模板時使用。</div>
+    <textarea id="prompt_currentWeekGenerator" rows="18" data-prompt-key="currentWeekGenerator">請根據以下需求，輸出 Workout Coach OS 可匯入的 Current Week JSON。
+
+使用情境：
+我只想更新本週課表，不新增 Templates 或 Exercise Library。
+
+規則：
+1. currentWeek 必須包含週一到週日。
+2. 每天格式為 {"day":"週一","plan":["課表名稱"]}。
+3. plan 只能使用目前 Templates 已存在的課表名稱，或 Rest。
+4. 若你想使用不存在的課表名稱，請改用 Program Generator，並同時輸出 templates。
+
+輸出規則：
+1. 使用 json code block 包裝輸出。
+2. 不要在 code block 外加入任何文字。
+3. 不要輸出解釋。
+4. code block 內必須是合法 JSON。
+
+輸出格式：
+```json
+{
+  "currentWeek":[
+    {"day":"週一","plan":["臀腿A","Core A"]},
+    {"day":"週二","plan":["肩背A"]},
+    {"day":"週三","plan":["Rest"]},
+    {"day":"週四","plan":["臀腿B","Core B"]},
+    {"day":"週五","plan":["肩背B"]},
+    {"day":"週六","plan":["臀腿C","Core A"]},
+    {"day":"週日","plan":["Rest"]}
+  ]
+}
+```</textarea>
+  </div>
+  <div class="card prompt-card">
+    <h2>🧩 Template Generator｜新增課表模板</h2>
+    <div class="hint">新增臀腿A-2、肩背C、Core C 等課表變化版本。</div>
+    <textarea id="prompt_templateGenerator" rows="18" data-prompt-key="templateGenerator">請產生 Workout Coach OS 的 Template JSON，用來新增課表變化版本。
+
+規則：
+1. 使用 json code block 包裝輸出。
+2. 不要在 code block 外加入任何文字。
+3. 不要輸出解釋。
+4. code block 內必須是合法 JSON。
+5. templates 必須是 array。
+6. 每個 template 必須包含 name, focus, tags, exercises。
+7. exercises 格式必須是 array of arrays：
+   ["動作名稱","組數","次數"]
+8. 動作名稱優先使用 Exercise Library 既有名稱。
+9. 若使用新動作，請另外輸出 exerciseLibrary。
+10. 適合 Abby：器材有限、膝蓋不適要避開高風險動作、以增肌減脂與線條為主。
+
+輸出格式：
+```json
+{
+  "templates":[
+    {
+      "name":"臀腿D",
+      "focus":"臀腿後側變化",
+      "tags":["臀","腿"],
+      "exercises":[
+        ["槓鈴臀推","4","8-10"],
+        ["Good Morning","3","10-12"],
+        ["相撲深蹲","3","12-15"],
+        ["消防栓","3","每邊12-15"]
+      ]
+    }
+  ]
+}
+```</textarea>
+  </div>
+  <div class="card prompt-card">
+    <h2>🏃 Workout Parser｜訓練紀錄轉 JSON</h2>
+    <div class="hint">把 Hevy 截圖或自然語言訓練紀錄轉成 Workout Log JSON。</div>
+    <textarea id="prompt_workoutParser" rows="16" data-prompt-key="workoutParser">請將以下 Hevy 截圖或訓練紀錄轉換成 Workout Coach OS 可匯入 JSON。
+
+輸出規則：
+1. 使用 json code block 包裝輸出。
+2. 不要在 code block 外加入任何文字。
+3. 不要輸出解釋。
+4. code block 內必須是合法 JSON。
+5. 輸出格式必須是 {"date":"YYYY-MM-DD","workout":"","exercises":[]}。
+6. exercises 內每個動作包含 name, weight, sets, reps。
+7. 若沒有重量可填 null。
+8. 若是估算或看不清楚，加入 "estimated": true。
+
+輸出格式範例：
+```json
+{
+  "date":"2026-06-08",
+  "workout":"臀腿A",
+  "exercises":[
+    {"name":"槓鈴臀推","weight":30,"sets":4,"reps":"10-12"},
+    {"name":"RDL","weight":25,"sets":4,"reps":"10-12"}
+  ]
+}
+```</textarea>
+  </div>
+  <div class="card prompt-card">
+    <h2>📚 Exercise Generator｜新增動作資料</h2>
+    <div class="hint">新增 Exercise Library 動作時使用。</div>
+    <textarea id="prompt_exerciseGenerator" rows="18" data-prompt-key="exerciseGenerator">請將以下新動作整理成 Workout Coach OS 的 Exercise JSON。
+
+輸出規則：
+1. 使用 json code block 包裝輸出。
+2. 不要在 code block 外加入任何文字。
+3. 不要輸出解釋。
+4. code block 內必須是合法 JSON。
+5. 支援單筆 object 或多筆 array。
+6. 必須包含 id, name, cat, equipment, muscle, difficulty, alt, cue, commonMistakes, note。
+7. cat 請使用：臀、腿、肩、背、手臂、核心、暖身、有氧、伸展。若不適合，可新增合理分類。
+8. alt 必須是 array。
+9. commonMistakes 必須是 array。
+10. 若此動作對 Abby 目前不推薦，note 請寫明原因。
+11. 若動作容易造成膝蓋不舒服，difficulty 可標為「觀察」，note 說明替代方式。
+
+輸出格式：
+```json
+{
+  "id":"exercise_id",
+  "name":"動作名稱",
+  "cat":"臀",
+  "equipment":"槓鈴/啞鈴/臀圈/彈力帶/徒手",
+  "muscle":"主要訓練肌群",
+  "difficulty":"初階/中階/進階/觀察",
+  "alt":["替代動作1","替代動作2"],
+  "cue":"教練提示",
+  "commonMistakes":["常見錯誤1","常見錯誤2"],
+  "note":"補充說明"
+}
+```</textarea>
+  </div>
+  <div class="card prompt-card">
+    <h2>📊 Weekly Review｜週回顧與調整</h2>
+    <div class="hint">每週把 History、Progress、Coach Notes 貼給 AI 後，請它分析並輸出下週 Program JSON。</div>
+    <textarea id="prompt_weeklyReview" rows="18" data-prompt-key="weeklyReview">請根據以下 Workout Coach OS 資料，幫我做週回顧並建議下週課表調整。
 
 請分析：
 1. 完成率
 2. 哪些肌群頻率不足
 3. 哪些動作太難或不舒服
 4. 哪些動作可保留
-5. 下週 Current Week 建議
+5. 哪些動作建議替換
+6. 下週 Current Week 建議
 
-請用繁體中文回答，最後附上可匯入的 Current Week JSON。</textarea>
+請用繁體中文先簡短分析，最後附上可匯入 Workout Coach OS 的 Program JSON。
+
+Program JSON 輸出規則：
+1. 使用 json code block 包裝輸出。
+2. code block 外可以有週回顧分析，但 JSON code block 內必須是合法 JSON。
+3. Program JSON 可包含 currentWeek、templates、exerciseLibrary。
+4. 如果沒有新增模板，只輸出 currentWeek。
+5. currentWeek 必須包含週一到週日。
+
+Program JSON 格式：
+```json
+{
+  "currentWeek":[
+    {"day":"週一","plan":["臀腿A","Core A"]},
+    {"day":"週二","plan":["肩背A"]},
+    {"day":"週三","plan":["Rest"]},
+    {"day":"週四","plan":["臀腿B","Core B"]},
+    {"day":"週五","plan":["肩背B"]},
+    {"day":"週六","plan":["臀腿C","Core A"]},
+    {"day":"週日","plan":["Rest"]}
+  ]
+}
+```</textarea>
   </div>
-  <div class="card">
-    <h2>Exercise Generator Prompt</h2>
-    <textarea rows="14" readonly>請將以下新動作整理成 Workout Coach OS 的 Exercise JSON。
+  <div class="card prompt-card">
+    <h2>📥 Program Import Guide｜匯入格式說明</h2>
+    <div class="hint">說明 Program Import 可以接受哪些 JSON，以及會覆蓋哪些資料。</div>
+    <textarea id="prompt_programImportGuide" rows="18" data-prompt-key="programImportGuide">Workout Coach OS 的 Program Import 可以貼上三種 JSON：
 
-規則：
-1. 只輸出合法 JSON，不要 markdown，不要解釋。
-2. 支援單筆 object 或多筆 array。
-3. 必須包含 id, name, cat, equipment, muscle, difficulty, alt, cue, commonMistakes, note。
-4. cat 請使用：臀、腿、肩、背、手臂、核心、暖身、有氧、伸展。若不適合，可新增合理分類。
-5. alt 必須是 array。
-6. commonMistakes 必須是 array。
-7. 若此動作對 Abby 目前不推薦，note 請寫明原因。
+一、只更新本週課表：
+```json
+{
+  "currentWeek":[
+    {"day":"週一","plan":["臀腿A","Core A"]},
+    {"day":"週二","plan":["肩背A"]},
+    {"day":"週三","plan":["Rest"]},
+    {"day":"週四","plan":["臀腿B","Core B"]},
+    {"day":"週五","plan":["肩背B"]},
+    {"day":"週六","plan":["臀腿C","Core A"]},
+    {"day":"週日","plan":["Rest"]}
+  ]
+}
+```
 
-輸出格式：
-{"id":"exercise_id","name":"動作名稱","cat":"臀","equipment":"槓鈴/啞鈴/臀圈/彈力帶/徒手","muscle":"主要訓練肌群","difficulty":"初階/中階/進階/觀察","alt":["替代動作1"],"cue":"教練提示","commonMistakes":["常見錯誤1"],"note":"補充說明"}</textarea>
+二、更新 Templates：
+```json
+{
+  "templates":[
+    {
+      "name":"臀腿A-2",
+      "focus":"臀推變化",
+      "tags":["臀","腿"],
+      "exercises":[["槓鈴臀推","4","8-10"]]
+    }
+  ]
+}
+```
+
+三、完整 Program：
+```json
+{
+  "currentWeek":[],
+  "templates":[],
+  "exerciseLibrary":[]
+}
+```
+
+匯入邏輯：
+- currentWeek 會覆蓋本週課表。
+- templates 會依 name 新增或更新。
+- exerciseLibrary 會依 id 或 name 新增或更新。
+- logs、notes 不會被 Program Import 覆蓋。</textarea>
+  </div>
+  <div class="card prompt-card">
+    <h2>🤖 AI Coach｜即時調整課表</h2>
+    <div class="hint">今天時間不夠、太累、器材受限或局部痠痛時，請 AI 幫你臨時調整課表。</div>
+    <textarea id="prompt_aiCoach" rows="18" data-prompt-key="aiCoach">你是 Workout Coach OS 的 AI Coach。
+
+請根據我的即時狀態，調整今天或本週課表，並輸出可匯入 Workout Coach OS 的 Program JSON。
+
+請考慮：
+1. 今天可訓練時間。
+2. 昨天或本週已訓練部位。
+3. 肌肉痠痛、疲勞、睡眠狀況。
+4. 可用器材：啞鈴、小槓鈴最高約 30kg、臀圈、彈力帶、滑步機。
+5. 膝蓋不舒服時避免保加利亞蹲、深度弓箭步等高風險動作。
+6. 目標是小基數高體脂的增肌減脂，不追求一次練爆。
+
+輸出方式：
+- 如果只是調整今天，請輸出 currentWeek，保留其他天不變。
+- 如果新增課表變化，請同時輸出 templates。
+- 如果新增動作，請同時輸出 exerciseLibrary。
+
+輸出規則：
+1. 使用 json code block 包裝輸出。
+2. 不要在 code block 外加入任何文字。
+3. 不要輸出解釋。
+4. code block 內必須是合法 JSON。</textarea>
   </div>
 </section>
 
@@ -588,6 +1042,20 @@ const DEFAULT_WEEK=[
 {day:"週六",plan:["臀腿C","Core A"]},
 {day:"週日",plan:["Rest"]}
 ];
+const DEFAULT_PROMPTS={
+  "projectIntro": "Workout Coach OS 是 Personal Fitness OS 的訓練教練系統。\n\n定位：\n不是 Hevy 替代品，不是純記錄器，而是「課表 + 教練回顧 + 進度整理」。\n\n核心架構：\n1. Exercise Library：固定動作資料庫。\n2. Workout Templates：預設課表庫，例如臀腿A/B/C、肩背A/B、Core A/B，也可以新增臀腿A-2、肩背C、Core C 等變化版。\n3. Current Week：本週實際執行課表，每週可調整，也可用 Program / Current Week Import 一鍵匯入。\n4. Program Import：貼上 Program JSON，可更新 currentWeek，也可以一起更新 templates 與 exerciseLibrary。\n5. Workout Logs：訓練紀錄，可由 Hevy 截圖轉 JSON 匯入。\n6. Coach Notes：太難、不舒服、沒感覺、想替換的紀錄。\n7. Progress：完成率、肌群頻率、重量進步。\n\n使用方式：\n- 今天要練什麼 → 看 Today。\n- 用 Hevy 記錄 → 截圖丟給 AI 轉 JSON → Workout Import。\n- 想換下週課表 → 用 Program Generator Prompt 請 AI 輸出 Program JSON → Program / Current Week Import。\n- 每週檢查 → History / Progress / Coach Notes → 產生下一週 Program JSON。",
+  "globalRules": "所有 Workout Coach OS 的 JSON 輸出都必須遵守：\n\n1. 使用 json code block 包裝輸出。\n2. 不要在 code block 外加入任何文字。\n3. 不要輸出解釋。\n4. code block 內必須是合法 JSON。\n5. JSON key 和 string value 必須使用雙引號。\n6. 不要使用註解。\n7. 不要使用 trailing comma。\n8. 數值使用 number；沒有重量可用 null。\n9. 若是估算或看不清楚，請加入 \"estimated\": true。\n10. 只有當使用者明確要求「純 JSON / 不要 markdown」時，才輸出裸 JSON。",
+  "programGenerator": "請根據以下 Workout Coach OS 資料，幫我產生下一週可匯入的 Program JSON。\n\n使用者條件：\n- 女生，150cm，小基數高體脂\n- 目標：增肌減脂、臀腿線條、肩背線條、核心穩定\n- 器材：啞鈴、小槓鈴最高約 30kg、臀圈、彈力帶、滑步機\n- 每週可訓練 4–5 天\n- 不喜歡跑步，有氧偏好滑步機\n- 保加利亞蹲容易膝蓋不舒服，除非明確安全替代，不要設為主力\n\n請參考：\n1. 最近 2–4 週 Workout Logs\n2. Progress\n3. Coach Notes\n4. Exercise Library\n5. 目前 Current Week\n\n課表規則：\n1. 保留 60–80% 已熟悉且有效的動作。\n2. 加入 20–40% 合理變化動作。\n3. 不要每週完全推翻；以可追蹤進步為主。\n4. 避免高風險膝蓋動作與使用者標記不舒服的動作。\n5. 若新增 Template，名稱請使用「臀腿A-2」「肩背C」「Core C」這類清楚名稱。\n6. 若新增 Exercise Library 動作，請一起放進 exerciseLibrary。\n7. 可輸出 currentWeek + templates + exerciseLibrary。\n8. 如果只需要調整本週，至少輸出 currentWeek。\n\n輸出規則：\n1. 使用 json code block 包裝輸出。\n2. 不要在 code block 外加入任何文字。\n3. 不要輸出解釋。\n4. code block 內必須是合法 JSON。\n5. JSON key 和 string value 必須使用雙引號。\n6. 不要使用註解或 trailing comma。\n\n輸出格式：\n```json\n{\n  \"currentWeek\":[\n    {\"day\":\"週一\",\"plan\":[\"臀腿A-2\",\"Core A\"]},\n    {\"day\":\"週二\",\"plan\":[\"肩背A\"]},\n    {\"day\":\"週三\",\"plan\":[\"Rest\"]},\n    {\"day\":\"週四\",\"plan\":[\"臀腿B\",\"Core B\"]},\n    {\"day\":\"週五\",\"plan\":[\"肩背B\"]},\n    {\"day\":\"週六\",\"plan\":[\"臀腿C\",\"Core A\"]},\n    {\"day\":\"週日\",\"plan\":[\"Rest\"]}\n  ],\n  \"templates\":[\n    {\n      \"name\":\"臀腿A-2\",\n      \"focus\":\"臀推變化\",\n      \"tags\":[\"臀\",\"腿\"],\n      \"exercises\":[\n        [\"槓鈴臀推\",\"4\",\"8-10\"],\n        [\"RDL\",\"4\",\"10-12\"],\n        [\"Step Up\",\"3\",\"每邊8-10\"],\n        [\"臀外展\",\"3\",\"15-20\"]\n      ]\n    }\n  ],\n  \"exerciseLibrary\":[]\n}\n```",
+  "programImport": "請輸出 Workout Coach OS 可匯入的 Program JSON。\n\n使用情境：\n我會把輸出的 JSON 貼到 Workout Coach OS 的「Program / Current Week Import」。\n\n輸出規則：\n1. 使用 json code block 包裝輸出。\n2. 不要在 code block 外加入任何文字。\n3. 不要輸出解釋。\n4. code block 內必須是合法 JSON。\n5. 如果只更新本週，輸出 currentWeek 即可。\n6. 如果有新增課表變化，請同時輸出 templates。\n7. 如果有新增動作資料，請同時輸出 exerciseLibrary。\n\n輸出格式：\n```json\n{\n  \"currentWeek\":[\n    {\"day\":\"週一\",\"plan\":[\"臀腿A\",\"Core A\"]},\n    {\"day\":\"週二\",\"plan\":[\"肩背A\"]},\n    {\"day\":\"週三\",\"plan\":[\"Rest\"]},\n    {\"day\":\"週四\",\"plan\":[\"臀腿B\",\"Core B\"]},\n    {\"day\":\"週五\",\"plan\":[\"肩背B\"]},\n    {\"day\":\"週六\",\"plan\":[\"臀腿C\",\"Core A\"]},\n    {\"day\":\"週日\",\"plan\":[\"Rest\"]}\n  ]\n}\n```",
+  "currentWeekGenerator": "請根據以下需求，輸出 Workout Coach OS 可匯入的 Current Week JSON。\n\n使用情境：\n我只想更新本週課表，不新增 Templates 或 Exercise Library。\n\n規則：\n1. currentWeek 必須包含週一到週日。\n2. 每天格式為 {\"day\":\"週一\",\"plan\":[\"課表名稱\"]}。\n3. plan 只能使用目前 Templates 已存在的課表名稱，或 Rest。\n4. 若你想使用不存在的課表名稱，請改用 Program Generator，並同時輸出 templates。\n\n輸出規則：\n1. 使用 json code block 包裝輸出。\n2. 不要在 code block 外加入任何文字。\n3. 不要輸出解釋。\n4. code block 內必須是合法 JSON。\n\n輸出格式：\n```json\n{\n  \"currentWeek\":[\n    {\"day\":\"週一\",\"plan\":[\"臀腿A\",\"Core A\"]},\n    {\"day\":\"週二\",\"plan\":[\"肩背A\"]},\n    {\"day\":\"週三\",\"plan\":[\"Rest\"]},\n    {\"day\":\"週四\",\"plan\":[\"臀腿B\",\"Core B\"]},\n    {\"day\":\"週五\",\"plan\":[\"肩背B\"]},\n    {\"day\":\"週六\",\"plan\":[\"臀腿C\",\"Core A\"]},\n    {\"day\":\"週日\",\"plan\":[\"Rest\"]}\n  ]\n}\n```",
+  "templateGenerator": "請產生 Workout Coach OS 的 Template JSON，用來新增課表變化版本。\n\n規則：\n1. 使用 json code block 包裝輸出。\n2. 不要在 code block 外加入任何文字。\n3. 不要輸出解釋。\n4. code block 內必須是合法 JSON。\n5. templates 必須是 array。\n6. 每個 template 必須包含 name, focus, tags, exercises。\n7. exercises 格式必須是 array of arrays：\n   [\"動作名稱\",\"組數\",\"次數\"]\n8. 動作名稱優先使用 Exercise Library 既有名稱。\n9. 若使用新動作，請另外輸出 exerciseLibrary。\n10. 適合 Abby：器材有限、膝蓋不適要避開高風險動作、以增肌減脂與線條為主。\n\n輸出格式：\n```json\n{\n  \"templates\":[\n    {\n      \"name\":\"臀腿D\",\n      \"focus\":\"臀腿後側變化\",\n      \"tags\":[\"臀\",\"腿\"],\n      \"exercises\":[\n        [\"槓鈴臀推\",\"4\",\"8-10\"],\n        [\"Good Morning\",\"3\",\"10-12\"],\n        [\"相撲深蹲\",\"3\",\"12-15\"],\n        [\"消防栓\",\"3\",\"每邊12-15\"]\n      ]\n    }\n  ]\n}\n```",
+  "workoutParser": "請將以下 Hevy 截圖或訓練紀錄轉換成 Workout Coach OS 可匯入 JSON。\n\n輸出規則：\n1. 使用 json code block 包裝輸出。\n2. 不要在 code block 外加入任何文字。\n3. 不要輸出解釋。\n4. code block 內必須是合法 JSON。\n5. 輸出格式必須是 {\"date\":\"YYYY-MM-DD\",\"workout\":\"\",\"exercises\":[]}。\n6. exercises 內每個動作包含 name, weight, sets, reps。\n7. 若沒有重量可填 null。\n8. 若是估算或看不清楚，加入 \"estimated\": true。\n\n輸出格式範例：\n```json\n{\n  \"date\":\"2026-06-08\",\n  \"workout\":\"臀腿A\",\n  \"exercises\":[\n    {\"name\":\"槓鈴臀推\",\"weight\":30,\"sets\":4,\"reps\":\"10-12\"},\n    {\"name\":\"RDL\",\"weight\":25,\"sets\":4,\"reps\":\"10-12\"}\n  ]\n}\n```",
+  "exerciseGenerator": "請將以下新動作整理成 Workout Coach OS 的 Exercise JSON。\n\n輸出規則：\n1. 使用 json code block 包裝輸出。\n2. 不要在 code block 外加入任何文字。\n3. 不要輸出解釋。\n4. code block 內必須是合法 JSON。\n5. 支援單筆 object 或多筆 array。\n6. 必須包含 id, name, cat, equipment, muscle, difficulty, alt, cue, commonMistakes, note。\n7. cat 請使用：臀、腿、肩、背、手臂、核心、暖身、有氧、伸展。若不適合，可新增合理分類。\n8. alt 必須是 array。\n9. commonMistakes 必須是 array。\n10. 若此動作對 Abby 目前不推薦，note 請寫明原因。\n11. 若動作容易造成膝蓋不舒服，difficulty 可標為「觀察」，note 說明替代方式。\n\n輸出格式：\n```json\n{\n  \"id\":\"exercise_id\",\n  \"name\":\"動作名稱\",\n  \"cat\":\"臀\",\n  \"equipment\":\"槓鈴/啞鈴/臀圈/彈力帶/徒手\",\n  \"muscle\":\"主要訓練肌群\",\n  \"difficulty\":\"初階/中階/進階/觀察\",\n  \"alt\":[\"替代動作1\",\"替代動作2\"],\n  \"cue\":\"教練提示\",\n  \"commonMistakes\":[\"常見錯誤1\",\"常見錯誤2\"],\n  \"note\":\"補充說明\"\n}\n```",
+  "weeklyReview": "請根據以下 Workout Coach OS 資料，幫我做週回顧並建議下週課表調整。\n\n請分析：\n1. 完成率\n2. 哪些肌群頻率不足\n3. 哪些動作太難或不舒服\n4. 哪些動作可保留\n5. 哪些動作建議替換\n6. 下週 Current Week 建議\n\n請用繁體中文先簡短分析，最後附上可匯入 Workout Coach OS 的 Program JSON。\n\nProgram JSON 輸出規則：\n1. 使用 json code block 包裝輸出。\n2. code block 外可以有週回顧分析，但 JSON code block 內必須是合法 JSON。\n3. Program JSON 可包含 currentWeek、templates、exerciseLibrary。\n4. 如果沒有新增模板，只輸出 currentWeek。\n5. currentWeek 必須包含週一到週日。\n\nProgram JSON 格式：\n```json\n{\n  \"currentWeek\":[\n    {\"day\":\"週一\",\"plan\":[\"臀腿A\",\"Core A\"]},\n    {\"day\":\"週二\",\"plan\":[\"肩背A\"]},\n    {\"day\":\"週三\",\"plan\":[\"Rest\"]},\n    {\"day\":\"週四\",\"plan\":[\"臀腿B\",\"Core B\"]},\n    {\"day\":\"週五\",\"plan\":[\"肩背B\"]},\n    {\"day\":\"週六\",\"plan\":[\"臀腿C\",\"Core A\"]},\n    {\"day\":\"週日\",\"plan\":[\"Rest\"]}\n  ]\n}\n```",
+  "programImportGuide": "Workout Coach OS 的 Program Import 可以貼上三種 JSON：\n\n一、只更新本週課表：\n```json\n{\n  \"currentWeek\":[\n    {\"day\":\"週一\",\"plan\":[\"臀腿A\",\"Core A\"]},\n    {\"day\":\"週二\",\"plan\":[\"肩背A\"]},\n    {\"day\":\"週三\",\"plan\":[\"Rest\"]},\n    {\"day\":\"週四\",\"plan\":[\"臀腿B\",\"Core B\"]},\n    {\"day\":\"週五\",\"plan\":[\"肩背B\"]},\n    {\"day\":\"週六\",\"plan\":[\"臀腿C\",\"Core A\"]},\n    {\"day\":\"週日\",\"plan\":[\"Rest\"]}\n  ]\n}\n```\n\n二、更新 Templates：\n```json\n{\n  \"templates\":[\n    {\n      \"name\":\"臀腿A-2\",\n      \"focus\":\"臀推變化\",\n      \"tags\":[\"臀\",\"腿\"],\n      \"exercises\":[[\"槓鈴臀推\",\"4\",\"8-10\"]]\n    }\n  ]\n}\n```\n\n三、完整 Program：\n```json\n{\n  \"currentWeek\":[],\n  \"templates\":[],\n  \"exerciseLibrary\":[]\n}\n```\n\n匯入邏輯：\n- currentWeek 會覆蓋本週課表。\n- templates 會依 name 新增或更新。\n- exerciseLibrary 會依 id 或 name 新增或更新。\n- logs、notes 不會被 Program Import 覆蓋。",
+  "aiCoach": "你是 Workout Coach OS 的 AI Coach。\n\n請根據我的即時狀態，調整今天或本週課表，並輸出可匯入 Workout Coach OS 的 Program JSON。\n\n請考慮：\n1. 今天可訓練時間。\n2. 昨天或本週已訓練部位。\n3. 肌肉痠痛、疲勞、睡眠狀況。\n4. 可用器材：啞鈴、小槓鈴最高約 30kg、臀圈、彈力帶、滑步機。\n5. 膝蓋不舒服時避免保加利亞蹲、深度弓箭步等高風險動作。\n6. 目標是小基數高體脂的增肌減脂，不追求一次練爆。\n\n輸出方式：\n- 如果只是調整今天，請輸出 currentWeek，保留其他天不變。\n- 如果新增課表變化，請同時輸出 templates。\n- 如果新增動作，請同時輸出 exerciseLibrary。\n\n輸出規則：\n1. 使用 json code block 包裝輸出。\n2. 不要在 code block 外加入任何文字。\n3. 不要輸出解釋。\n4. code block 內必須是合法 JSON。"
+};
+
 
 function enrichExercises(){
   const enrich={
@@ -603,14 +1071,17 @@ function enrichExercises(){
   EXERCISES.forEach(e=>{Object.assign(e,enrich[e.name]||{}); if(!e.difficulty)e.difficulty="初階"; if(!e.commonMistakes)e.commonMistakes=[]; if(!e.note)e.note="";});
 }
 
-let DATA={logs:{},notes:[],currentWeek:DEFAULT_WEEK,templates:TEMPLATES,exerciseLibrary:EXERCISES,settings:{}};
+let DATA={logs:{},notes:[],currentWeek:DEFAULT_WEEK,templates:TEMPLATES,exerciseLibrary:EXERCISES,settings:{},prompts:JSON.parse(JSON.stringify(DEFAULT_PROMPTS))};
 let cur=ymd(new Date());
 function ymd(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 function parseYmd(s){const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)}
 function fmt(s){const d=parseYmd(s);return `${d.getMonth()+1} 月 ${d.getDate()} 日 · ${WEEKDAYS[d.getDay()]}`}
 function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function save(){localStorage.setItem(KEY,JSON.stringify(DATA))}
-function load(){try{const v=localStorage.getItem(KEY);if(v)DATA=Object.assign(DATA,JSON.parse(v))}catch(e){}}
+function load(){try{const v=localStorage.getItem(KEY);if(v)DATA=Object.assign(DATA,JSON.parse(v))}catch(e){}
+  if(!DATA.prompts)DATA.prompts=JSON.parse(JSON.stringify(DEFAULT_PROMPTS));
+  DATA.prompts=Object.assign(JSON.parse(JSON.stringify(DEFAULT_PROMPTS)), DATA.prompts||{});
+}
 function templateMap(){return Object.fromEntries((DATA.templates||TEMPLATES).map(t=>[t.name,t]))}
 function exInfo(name){return (DATA.exerciseLibrary||EXERCISES).find(e=>e.name===name)||{}}
 function currentWeekStart(dateStr=cur){const d=parseYmd(dateStr); const diff=(d.getDay()+6)%7; d.setDate(d.getDate()-diff); return ymd(d)}
@@ -682,7 +1153,40 @@ function renderToday(){
   }).join("") || `<div class="note">今天是 Rest。可以散步、伸展，或完全休息。</div>`;
 }
 function renderWeek(){
-  weekEditor.innerHTML=DATA.currentWeek.map((d,i)=>`<div class="group open"><button class="grouphead"><span><b>${d.day}</b><small>用逗號分隔，例如 臀腿A, Core A 或 Rest</small></span></button><div class="groupbody"><input data-week="${i}" placeholder="例如：臀腿A, Core A 或 Rest" value="${esc(d.plan.join(", "))}"></div></div>`).join("");
+  const templateNames=(DATA.templates||TEMPLATES).map(t=>t.name);
+  const options=["Rest",...templateNames].map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  weekEditor.innerHTML=DATA.currentWeek.map((d,i)=>{
+    const plan=Array.isArray(d.plan)&&d.plan.length?d.plan:["Rest"];
+    const pills=plan.map((p,pi)=>`<span class="week-pill ${p==="Rest"?"rest":""}">${esc(p)}${p!=="Rest"?`<button type="button" data-week-remove="${i}|${pi}" aria-label="移除 ${esc(p)}">✕</button>`:""}</span>`).join("");
+    return `<div class="group open">
+      <button class="grouphead"><span><b>${d.day}</b><small>從 Templates 選擇加入；新匯入的 Template 會自動出現在選單。</small></span></button>
+      <div class="groupbody">
+        <div class="week-select-row">
+          <select data-week-select="${i}">${options}</select>
+          <button type="button" data-week-add="${i}">加入</button>
+        </div>
+        <div class="week-plan-pills">${pills}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+function addWeekPlan(dayIndex,name){
+  const day=DATA.currentWeek[dayIndex];
+  if(!day)return;
+  if(name==="Rest"){day.plan=["Rest"];}
+  else{
+    day.plan=(Array.isArray(day.plan)?day.plan:[]).filter(x=>x && x!=="Rest");
+    if(!day.plan.includes(name))day.plan.push(name);
+    if(!day.plan.length)day.plan=["Rest"];
+  }
+  save();renderAll();
+}
+function removeWeekPlan(dayIndex,planIndex){
+  const day=DATA.currentWeek[dayIndex];
+  if(!day||!Array.isArray(day.plan))return;
+  day.plan.splice(planIndex,1);
+  if(!day.plan.length)day.plan=["Rest"];
+  save();renderAll();
 }
 function renderTemplates(){
   templateList.innerHTML=(DATA.templates||TEMPLATES).map(t=>`<div class="group open"><button class="grouphead" data-toggle><span><b>${esc(t.name)}</b><small>${esc(t.focus)}｜${(t.tags||[]).join(" / ")}</small></span><span>▼</span></button><div class="groupbody"><div class="itemgrid">${t.exercises.map(e=>`<div class="itemcard"><div class="n">${esc(e[0])}</div><div class="m">${esc(e[1])} 組｜${esc(e[2])}</div></div>`).join("")}</div></div></div>`).join("");
@@ -769,28 +1273,138 @@ function importWorkoutBackup(raw){
   if(raw.exerciseLibrary)DATA.exerciseLibrary=raw.exerciseLibrary;
   if(raw.logs)DATA.logs=raw.logs;
   if(raw.notes)DATA.notes=raw.notes;
+  if(raw.prompts)DATA.prompts=Object.assign(JSON.parse(JSON.stringify(DEFAULT_PROMPTS)), raw.prompts);
   save();renderAll();
 }
 
-function exportAll(){return {version:"1.2.1-file",exportedAt:new Date().toISOString(),currentWeek:DATA.currentWeek,templates:DATA.templates,exerciseLibrary:DATA.exerciseLibrary||EXERCISES,logs:DATA.logs,notes:DATA.notes}}
-function renderAll(){renderDashboard();renderToday();renderWeek();renderTemplates();renderLibrary();renderHistory();renderNotes();renderProgress();}
+
+function normalizeWeek(rawWeek){
+  const arr=Array.isArray(rawWeek)?rawWeek:[];
+  return arr.map((d,i)=>{
+    const day=d.day||WEEKDAYS[(i+1)%7]||`第${i+1}天`;
+    let plan=d.plan||d.workouts||d.template||[];
+    if(typeof plan==="string") plan=plan.split(",").map(x=>x.trim()).filter(Boolean);
+    if(!Array.isArray(plan)) plan=[];
+    return {day,plan};
+  });
+}
+function upsertTemplates(rawTemplates){
+  const arr=Array.isArray(rawTemplates)?rawTemplates:[];
+  if(!DATA.templates)DATA.templates=[];
+  let n=0,bad=[];
+  arr.forEach(t=>{
+    if(!t || !t.name || !Array.isArray(t.exercises)){bad.push(t&&t.name?t.name:"未命名"); return;}
+    if(!Array.isArray(t.tags))t.tags=[];
+    const cleaned={name:t.name,focus:t.focus||"",tags:t.tags,exercises:t.exercises};
+    const idx=DATA.templates.findIndex(x=>x.name===cleaned.name);
+    if(idx>=0)DATA.templates[idx]=Object.assign({},DATA.templates[idx],cleaned);
+    else DATA.templates.push(cleaned);
+    n++;
+  });
+  return {added:n,bad};
+}
+function upsertExerciseLibrary(rawExercises){
+  const arr=Array.isArray(rawExercises)?rawExercises:[];
+  let n=0,bad=[];
+  if(!DATA.exerciseLibrary)DATA.exerciseLibrary=EXERCISES;
+  arr.forEach(e=>{
+    if(!e || !e.name){bad.push(e&&e.id?e.id:"未命名"); return;}
+    if(!e.id)e.id=e.name.toLowerCase().replace(/\s+/g,"_");
+    if(!e.alt)e.alt=[];
+    if(!e.commonMistakes)e.commonMistakes=[];
+    const idx=DATA.exerciseLibrary.findIndex(x=>x.name===e.name || x.id===e.id);
+    if(idx>=0)DATA.exerciseLibrary[idx]=Object.assign({},DATA.exerciseLibrary[idx],e);
+    else DATA.exerciseLibrary.push(e);
+    n++;
+  });
+  return {added:n,bad};
+}
+function importProgram(raw){
+  const source=raw.program||raw;
+  let weekCount=0, templateResult={added:0,bad:[]}, exerciseResult={added:0,bad:[]};
+  const rawWeek=source.currentWeek||source.week||source.schedule;
+  if(Array.isArray(rawWeek)){
+    const week=normalizeWeek(rawWeek);
+    if(week.length){
+      DATA.currentWeek=week;
+      weekCount=week.length;
+    }
+  }
+  if(Array.isArray(source.templates)){
+    templateResult=upsertTemplates(source.templates);
+  }
+  if(Array.isArray(source.exerciseLibrary)){
+    exerciseResult=upsertExerciseLibrary(source.exerciseLibrary);
+  }else if(Array.isArray(source.exercises)){
+    exerciseResult=upsertExerciseLibrary(source.exercises);
+  }
+  save();renderAll();
+  return {weekCount,templateResult,exerciseResult};
+}
+function exportProgram(){
+  return {
+    version:"program-v1",
+    exportedAt:new Date().toISOString(),
+    currentWeek:DATA.currentWeek,
+    templates:DATA.templates,
+    exerciseLibrary:DATA.exerciseLibrary||EXERCISES
+  };
+}
+
+
+function exportAll(){return {version:"2.0-program-prompts",exportedAt:new Date().toISOString(),currentWeek:DATA.currentWeek,templates:DATA.templates,exerciseLibrary:DATA.exerciseLibrary||EXERCISES,logs:DATA.logs,notes:DATA.notes,prompts:DATA.prompts}}
+
+function renderGuidePrompts(){
+  if(!DATA.prompts)DATA.prompts=Object.assign({},DEFAULT_PROMPTS);
+  Object.keys(DEFAULT_PROMPTS).forEach(k=>{
+    const el=document.getElementById(`prompt_${k}`);
+    if(el && el.value !== (DATA.prompts[k]||"")) el.value=DATA.prompts[k]||"";
+  });
+}
+function setupPromptAutoSave(){
+  document.querySelectorAll("[data-prompt-key]").forEach(el=>{
+    el.addEventListener("input",()=>{
+      if(!DATA.prompts)DATA.prompts={};
+      DATA.prompts[el.dataset.promptKey]=el.value;
+      save();
+    });
+  });
+}
+function renderAll(){renderDashboard();renderToday();renderWeek();renderTemplates();renderLibrary();renderHistory();renderNotes();renderProgress();renderGuidePrompts();}
 document.body.addEventListener("click",e=>{
  const tab=e.target.closest("nav button"); if(tab){document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));tab.classList.add("on");document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));document.getElementById(tab.dataset.tab).classList.add("on");renderAll();return}
  if(e.target.id==="prev"){const d=parseYmd(cur);d.setDate(d.getDate()-1);cur=ymd(d);renderAll();return}
  if(e.target.id==="next"){const d=parseYmd(cur);d.setDate(d.getDate()+1);cur=ymd(d);renderAll();return}
+ const wa=e.target.closest("[data-week-add]"); if(wa){const i=+wa.dataset.weekAdd; const sel=document.querySelector(`[data-week-select="${i}"]`); addWeekPlan(i,sel?.value||"Rest");return}
+ const wr=e.target.closest("[data-week-remove]"); if(wr){const [i,pi]=wr.dataset.weekRemove.split("|").map(Number); removeWeekPlan(i,pi);return}
  const tog=e.target.closest("[data-toggle]"); if(tog){tog.closest(".group").classList.toggle("open");return}
  const st=e.target.closest("[data-status]"); if(st){const [name,status]=st.dataset.status.split("|");setStatus(cur,name,status);return}
  const sv=e.target.closest("[data-save-ex]"); if(sv){saveExerciseInput(sv.dataset.saveEx);return}
  const nx=e.target.closest("[data-note]"); if(nx){DATA.notes.splice(+nx.dataset.note,1);save();renderAll();return}
 });
 todayWorkoutSelect.addEventListener("change",()=>{const idx=+todayWorkoutSelect.value; const d=parseYmd(currentWeekStart()); d.setDate(d.getDate()+idx); cur=ymd(d); renderAll();});
-saveWeek.onclick=()=>{document.querySelectorAll("[data-week]").forEach(inp=>{const i=+inp.dataset.week;DATA.currentWeek[i].plan=inp.value.split(",").map(x=>x.trim()).filter(Boolean)});save();weekSaved.classList.add("show");setTimeout(()=>weekSaved.classList.remove("show"),1200);renderAll()};
+saveWeek.onclick=()=>{save();weekSaved.classList.add("show");setTimeout(()=>weekSaved.classList.remove("show"),1200);renderAll()};
 function handleWorkoutDailyImport(input){const r=importWorkout(input);importMsg.textContent=`已匯入 ${r.count} 個動作到 ${r.date}`}
 importWorkoutJson.onclick=()=>chooseJSONFile(input=>handleWorkoutDailyImport(input));
 if(document.getElementById("importWorkoutJsonText")) importWorkoutJsonText.onclick=()=>{try{handleWorkoutDailyImport(JSON.parse(workoutJson.value))}catch(e){importMsg.textContent="JSON 格式錯誤"}};
 exportTodayJson.onclick=()=>{downloadJSON(`Workout_${cur}_daily.json`,E(cur));importMsg.textContent="已下載今日訓練 JSON 檔"};
 exportAllJson.onclick=()=>{downloadJSON(`Workout_backup_${ymd(new Date())}.json`,exportAll());importMsg.textContent="已下載全部備份 JSON 檔"};
 clearWorkoutJson.onclick=()=>{workoutJson.value="";importMsg.textContent=""};
+
+if(document.getElementById("importProgramJson")) importProgramJson.onclick=()=>{
+  try{
+    const r=importProgram(JSON.parse(programJson.value));
+    const parts=[];
+    if(r.weekCount)parts.push(`更新本週課表 ${r.weekCount} 天`);
+    if(r.templateResult.added)parts.push(`新增/更新 Templates ${r.templateResult.added} 個`);
+    if(r.exerciseResult.added)parts.push(`新增/更新動作 ${r.exerciseResult.added} 個`);
+    const bad=[...(r.templateResult.bad||[]),...(r.exerciseResult.bad||[])];
+    programMsg.textContent=parts.length?`已匯入：${parts.join("、")}${bad.length?`；格式略過：${bad.join("、")}`:""}`:"沒有找到可匯入的 currentWeek / templates / exerciseLibrary";
+  }catch(e){programMsg.textContent="JSON 格式錯誤"}
+};
+if(document.getElementById("exportProgramJson")) exportProgramJson.onclick=()=>{downloadJSON(`Workout_program_${ymd(new Date())}.json`,exportProgram());programMsg.textContent="已下載目前課表 Program JSON 檔"};
+if(document.getElementById("clearProgramJson")) clearProgramJson.onclick=()=>{programJson.value="";programMsg.textContent=""};
+
 if(document.getElementById("importBackupJson")) importBackupJson.onclick=()=>chooseJSONFile(raw=>{if(!confirm("匯入全部備份會覆蓋目前 Workout Coach OS 資料，確定嗎？"))return;importWorkoutBackup(raw);importMsg.textContent="已匯入全部備份 JSON 檔"});
 
 if(document.getElementById("importExerciseJson")) importExerciseJson.onclick=()=>{try{const r=importExercises(JSON.parse(exerciseJson.value));exerciseMsg.textContent=`已新增/更新 ${r.added} 個動作${r.bad.length?`，格式錯誤：${r.bad.join("、")}`:""}`}catch(e){exerciseMsg.textContent="JSON 格式錯誤"}};
@@ -799,7 +1413,7 @@ if(document.getElementById("clearExerciseJson")) clearExerciseJson.onclick=()=>{
 
 addNote.onclick=()=>{DATA.notes.push({date:cur,exercise:noteExercise.value||"未指定",type:noteType.value,text:noteText.value||""});noteExercise.value="";noteText.value="";save();renderAll()};
 reset.onclick=()=>{if(confirm("確定清空所有 Workout Coach OS 資料？")){localStorage.removeItem(KEY);location.reload()}};
-load(); enrichExercises(); if(!DATA.exerciseLibrary)DATA.exerciseLibrary=EXERCISES; renderAll();
+load(); enrichExercises(); if(!DATA.exerciseLibrary)DATA.exerciseLibrary=EXERCISES; setupPromptAutoSave(); renderAll();
 </script>
 </body>
 </html>
