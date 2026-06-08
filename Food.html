@@ -52,7 +52,7 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--sage)}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 @media(max-width:640px){.grid2,.grid3,.grid4{grid-template-columns:1fr}.row{flex-direction:column;align-items:stretch}.btn{width:100%}}
 .datebar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
-.datebar button{border:1px solid var(--line);background:#fff;border-radius:10px;width:38px;height:38px;cursor:pointer;font-size:1rem;color:var(--ink)}
+.datebar button{border:1px solid var(--line);background:#fff;border-radius:10px;width:38px;height:38px;cursor:pointer;font-size:1rem;color:var(--ink);touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .datebar .d{font-family:"Fraunces",serif;font-size:1.05rem;font-weight:500;text-align:center;flex:1}
 .hero{background:linear-gradient(135deg,#fffaf1,#eef5e8);border:1px solid var(--line);border-radius:22px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
 .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
@@ -798,6 +798,7 @@ let cur=ymd(new Date());
 function ymd(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 function parseYmd(s){const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)}
 function fmt(s){const d=parseYmd(s);return `${d.getMonth()+1} 月 ${d.getDate()} 日 · ${["週日","週一","週二","週三","週四","週五","週六"][d.getDay()]}`}
+function shiftDay(delta){const d=parseYmd(cur);d.setDate(d.getDate()+delta);cur=ymd(d);renderAll()}
 function E(){if(!DATA.entries[cur])DATA.entries[cur]=[];return DATA.entries[cur]}
 function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function fmtNum(n){n=Number(n)||0;return Number.isInteger(n)?String(n):n.toFixed(1).replace(/\.0$/,"")}
@@ -1133,8 +1134,6 @@ function renderGuidePrompts(){
 }
 document.body.addEventListener("click",e=>{
   const tab=e.target.closest("nav button"); if(tab){document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on")); tab.classList.add("on"); document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on")); document.getElementById(tab.dataset.tab).classList.add("on"); renderAll(); return}
-  if(e.target.id==="prev"||e.target.classList.contains("prevMirror")){const d=parseYmd(cur);d.setDate(d.getDate()-1);cur=ymd(d);renderAll();return}
-  if(e.target.id==="next"||e.target.classList.contains("nextMirror")){const d=parseYmd(cur);d.setDate(d.getDate()+1);cur=ymd(d);renderAll();return}
   const hd=e.target.closest("[data-history-date]"); if(hd){cur=hd.dataset.historyDate;document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));document.querySelector('nav button[data-tab="dash"]').classList.add("on");document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));document.getElementById("dash").classList.add("on");renderAll();return}
   const tog=e.target.closest("[data-toggle]"); if(tog){tog.closest(".group").classList.toggle("open");return}
   const fav=e.target.closest("[data-fav-food]"); if(fav){setFavorite(fav.dataset.favFood,!isFavorite(fav.dataset.favFood));return}
@@ -1169,6 +1168,18 @@ document.body.addEventListener("click",e=>{
   }
   const x=e.target.closest(".x"); if(x){E().splice(+x.dataset.i,1);save();renderAll();return}
 });
+function bindDateNav(){
+  const bind=(el,delta)=>{
+    if(!el)return;
+    el.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();shiftDay(delta);});
+  };
+  bind(document.getElementById("prev"),-1);
+  bind(document.getElementById("next"),1);
+  document.querySelectorAll(".prevMirror").forEach(el=>bind(el,-1));
+  document.querySelectorAll(".nextMirror").forEach(el=>bind(el,1));
+}
+bindDateNav();
+
 function handleFoodDailyImport(input){
   const r=importLogs(input);
   logMsg.textContent=`已匯入 ${r.added} 筆到 ${r.date}${r.missing.length?`，custom 缺營養素：${r.missing.join("、")}`:""}`;
