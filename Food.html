@@ -280,6 +280,31 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
   }
 }
 
+.deleteFoodBtn{
+  border:1px solid #e0b0a0;
+  background:#fff7f2;
+  color:var(--clay);
+  border-radius:999px;
+  padding:5px 9px;
+  font-size:.78rem;
+  cursor:pointer;
+  font-family:inherit;
+  white-space:nowrap;
+}
+.deleteFoodBtn:hover{
+  background:#f5e2da;
+  border-color:var(--clay);
+}
+.foodCardActions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+@media(max-width:520px){
+  .foodCardActions{justify-content:flex-start}
+}
+
 </style>
 </head>
 <body>
@@ -313,7 +338,7 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
         <div class="heroTitle">今日營養 Dashboard</div>
         <div class="heroSub">食材資料庫會依 gram / ml / qty 自動換算今日總量。</div>
       </div>
-      <div class="badge">v16</div>
+      <div class="badge">v16.2</div>
     </div>
     <div class="grid4" id="metricGrid"></div>
     <div class="coachpanel" style="margin-top:10px">
@@ -860,6 +885,34 @@ function setFavorite(name,on){
   if(on)DATA.favorites.push(name);
   save();renderAll();
 }
+function removeFoodFromDatabase(name){
+  name=standardName(name);
+  const usedInCombos=(DATA.combos||[]).filter(c=>(c.items||[]).some(it=>standardName(it.food||it.name)===name)).map(c=>c.name);
+  let msg=`確定刪除食材「${name}」嗎？
+
+會同步移除：常用收藏、常用份量、使用次數。
+不會刪除歷史飲食紀錄。`;
+  if(usedInCombos.length)msg+=`
+
+注意：此食材仍被 Combo 使用：${usedInCombos.join("、")}。刪除後該 Combo 可能無法正確計算。`;
+  if(!confirm(msg))return;
+  DATA.foods=(DATA.foods||[]).filter(f=>f.name!==name);
+  DATA.favorites=(DATA.favorites||[]).filter(x=>x!==name);
+  if(DATA.servings)delete DATA.servings[name];
+  if(DATA.usageStats)delete DATA.usageStats[name];
+  save();renderAll();
+}
+function removeComboFromDatabase(name){
+  if(!confirm(`確定刪除 Combo「${name}」嗎？
+
+會同步移除：常用收藏、常用份量、使用次數。
+不會刪除歷史飲食紀錄。`))return;
+  DATA.combos=(DATA.combos||[]).filter(c=>c.name!==name);
+  DATA.favorites=(DATA.favorites||[]).filter(x=>x!==name);
+  if(DATA.servings)delete DATA.servings[name];
+  if(DATA.usageStats)delete DATA.usageStats[name];
+  save();renderAll();
+}
 function bumpUsage(name){
   name=standardName(name);
   if(!DATA.usageStats)DATA.usageStats={};
@@ -1098,7 +1151,10 @@ function renderDB(){
             <div class="m">${esc(f.unit)}｜${fmtNum(f.nutrition.calories)} kcal｜P ${fmtNum(f.nutrition.protein)} C ${fmtNum(f.nutrition.carbs)} F ${fmtNum(f.nutrition.fat)}${DATA.usageStats?.[f.name]?`｜已用 ${DATA.usageStats[f.name]} 次`:""}</div>
             <div class="m">常用份量：${esc(servingText(f.name).replace(/^資料庫單位：.*?｜常用份量：/,""))}</div>
           </div>
-          <button class="starbtn ${isFavorite(f.name)?"on":""}" data-fav-food="${esc(f.name)}">${isFavorite(f.name)?"★ 常用":"☆ 加常用"}</button>
+          <div class="foodCardActions">
+            <button class="starbtn ${isFavorite(f.name)?"on":""}" data-fav-food="${esc(f.name)}">${isFavorite(f.name)?"★ 常用":"☆ 加常用"}</button>
+            <button class="deleteFoodBtn" data-delete-food="${esc(f.name)}">刪除</button>
+          </div>
         </div>
         ${servingEditor(f.name)}
       </div>`).join("")}</div></div>
@@ -1111,7 +1167,10 @@ function renderDB(){
           <div class="m">${c.items.map(i=>`${i.food}${i.gram?i.gram+"g":i.ml?i.ml+"ml":i.qty+"份"}`).join(" + ")}${DATA.usageStats?.[c.name]?`｜已用 ${DATA.usageStats[c.name]} 次`:""}</div>
           <div class="m">常用份量：${esc(servingText(c.name).replace(/^組合：/,""))}</div>
         </div>
-        <button class="starbtn ${isFavorite(c.name)?"on":""}" data-fav-food="${esc(c.name)}">${isFavorite(c.name)?"★ 常用":"☆ 加常用"}</button>
+        <div class="foodCardActions">
+          <button class="starbtn ${isFavorite(c.name)?"on":""}" data-fav-food="${esc(c.name)}">${isFavorite(c.name)?"★ 常用":"☆ 加常用"}</button>
+          <button class="deleteFoodBtn" data-delete-combo="${esc(c.name)}">刪除</button>
+        </div>
       </div>
       ${servingEditor(c.name)}
     </div>`).join("")}</div></div></div>`;
@@ -1136,6 +1195,8 @@ document.body.addEventListener("click",e=>{
   const hd=e.target.closest("[data-history-date]"); if(hd){cur=hd.dataset.historyDate;document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));document.querySelector('nav button[data-tab="dash"]').classList.add("on");document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));document.getElementById("dash").classList.add("on");renderAll();return}
   const tog=e.target.closest("[data-toggle]"); if(tog){tog.closest(".group").classList.toggle("open");return}
   const fav=e.target.closest("[data-fav-food]"); if(fav){setFavorite(fav.dataset.favFood,!isFavorite(fav.dataset.favFood));return}
+  const delFood=e.target.closest("[data-delete-food]"); if(delFood){removeFoodFromDatabase(delFood.dataset.deleteFood);return}
+  const delCombo=e.target.closest("[data-delete-combo]"); if(delCombo){removeComboFromDatabase(delCombo.dataset.deleteCombo);return}
   const sv=e.target.closest("[data-save-serving]"); if(sv){
     const name=sv.dataset.saveServing;
     const amount=document.querySelector(`[data-serving-amount="${CSS.escape(name)}"]`)?.value||1;
@@ -1247,7 +1308,7 @@ if(document.getElementById("foodSelect")){
 
 function exportAllBackup(){
   return {
-    version:"1.6.1",
+    version:"1.6.2",
     exportedAt:new Date().toISOString(),
     foods:DATA.foods,
     combos:DATA.combos,
