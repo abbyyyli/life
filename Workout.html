@@ -363,6 +363,58 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
   .actual-add-row{grid-template-columns:1fr}
 }
 
+
+/* Direct Prompt Editor */
+.prompt-direct-editor{
+  display:grid;
+  gap:10px;
+}
+.prompt-direct-editor select,
+.prompt-direct-editor textarea{
+  border:1px solid var(--line);
+  background:#fffdf9;
+  border-radius:14px;
+}
+.prompt-direct-editor textarea{
+  min-height:260px;
+  font-size:.86rem;
+  line-height:1.55;
+}
+.prompt-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+}
+.prompt-actions button{
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--ink);
+  border-radius:11px;
+  padding:9px 12px;
+  font-family:inherit;
+  font-size:.84rem;
+  cursor:pointer;
+}
+.prompt-actions button.primary{
+  background:var(--sage);
+  color:#fff;
+  border-color:var(--sage);
+}
+.prompt-actions button.warn{
+  background:#fff7ed;
+  color:#7a4f34;
+  border-color:var(--sand);
+}
+.prompt-status{
+  font-size:.78rem;
+  color:var(--muted);
+  min-height:1.2em;
+}
+@media(max-width:640px){
+  .prompt-actions button{width:100%}
+}
+
 </style>
 </head>
 <body>
@@ -579,6 +631,21 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
   <div class="card">
     <h2>Guide & Prompts</h2>
     <div class="hint">這裡是可編輯 Prompt Library。內容會自動儲存在 Workout OS，並跟全部備份一起匯出。</div>
+  </div>
+  <div class="card" id="directPromptEditorCard">
+    <h2>✏️ Direct Prompt Editor｜直接編輯 Prompt</h2>
+    <div class="hint">選一段 Prompt 後直接修改；按「套用」會同步更新下方相同 Prompt、localStorage，並跟全部備份一起匯出。這個區塊是給 GitHub Pages 使用時更穩定的直接編輯入口。</div>
+    <div class="prompt-direct-editor">
+      <select id="promptDirectSelect"></select>
+      <textarea id="promptDirectText" placeholder="選擇 Prompt 後在這裡直接編輯"></textarea>
+      <div class="prompt-actions">
+        <button class="primary" id="applyDirectPrompt" type="button">套用這段 Prompt</button>
+        <button id="copyDirectPrompt" type="button">複製目前 Prompt</button>
+        <button class="warn" id="resetDirectPrompt" type="button">重置目前 Prompt</button>
+        <button id="exportPromptsOnly" type="button">匯出 Prompts JSON</button>
+      </div>
+      <div class="prompt-status" id="promptDirectStatus"></div>
+    </div>
   </div>
   <div class="card prompt-card">
     <h2>📖 Project Intro｜專案介紹</h2>
@@ -1389,6 +1456,82 @@ function exportProgram(){
 
 function exportAll(){return {version:"2.0-program-prompts",exportedAt:new Date().toISOString(),currentWeek:DATA.currentWeek,templates:DATA.templates,exerciseLibrary:DATA.exerciseLibrary||EXERCISES,logs:DATA.logs,notes:DATA.notes,prompts:DATA.prompts}}
 
+
+const PROMPT_LABELS={
+  projectIntro:"📖 Project Intro｜專案介紹",
+  globalRules:"🧱 JSON Robustness Rules",
+  programGenerator:"🏋️ Program Generator｜生成下一週課表",
+  programImport:"🔄 Program Import Prompt｜可匯入課表格式",
+  currentWeekGenerator:"📅 Current Week Generator｜只更新本週",
+  templateGenerator:"🧩 Template Generator｜新增課表模板",
+  workoutParser:"🏃 Workout Parser｜訓練紀錄轉 JSON",
+  exerciseGenerator:"📚 Exercise Generator｜新增動作資料",
+  weeklyReview:"📊 Weekly Review｜週回顧與調整",
+  programImportGuide:"📥 Program Import Guide｜匯入格式說明",
+  aiCoach:"🤖 AI Coach｜即時調整課表"
+};
+function currentPromptKey(){
+  const sel=document.getElementById("promptDirectSelect");
+  return sel && sel.value ? sel.value : Object.keys(DEFAULT_PROMPTS)[0];
+}
+function syncPromptFields(key,value,source){
+  if(!DATA.prompts)DATA.prompts={};
+  DATA.prompts[key]=value;
+  document.querySelectorAll(`[data-prompt-key="${CSS.escape(key)}"]`).forEach(el=>{
+    if(el!==source && el.value!==value) el.value=value;
+  });
+  const direct=document.getElementById("promptDirectText");
+  if(direct && direct!==source && currentPromptKey()===key && direct.value!==value) direct.value=value;
+  save();
+}
+function setPromptStatus(msg){
+  const el=document.getElementById("promptDirectStatus");
+  if(!el)return;
+  el.textContent=msg||"";
+  if(msg) setTimeout(()=>{ if(el.textContent===msg) el.textContent=""; },1800);
+}
+function renderDirectPromptEditor(){
+  const sel=document.getElementById("promptDirectSelect");
+  const txt=document.getElementById("promptDirectText");
+  if(!sel || !txt)return;
+  const keys=Object.keys(DEFAULT_PROMPTS);
+  const previous=sel.value || keys[0];
+  sel.innerHTML=keys.map(k=>`<option value="${esc(k)}">${esc(PROMPT_LABELS[k]||k)}</option>`).join("");
+  sel.value=keys.includes(previous)?previous:keys[0];
+  const key=sel.value;
+  const value=(DATA.prompts&&DATA.prompts[key]) || DEFAULT_PROMPTS[key] || "";
+  if(txt.value!==value) txt.value=value;
+}
+function applyDirectPrompt(){
+  const key=currentPromptKey();
+  const txt=document.getElementById("promptDirectText");
+  if(!txt)return;
+  syncPromptFields(key,txt.value,txt);
+  setPromptStatus("已套用並儲存。");
+}
+function resetDirectPrompt(){
+  const key=currentPromptKey();
+  const value=DEFAULT_PROMPTS[key]||"";
+  syncPromptFields(key,value,null);
+  renderDirectPromptEditor();
+  setPromptStatus("已重置目前 Prompt。");
+}
+async function copyDirectPrompt(){
+  const txt=document.getElementById("promptDirectText");
+  if(!txt)return;
+  try{
+    await navigator.clipboard.writeText(txt.value);
+    setPromptStatus("已複製目前 Prompt。");
+  }catch(e){
+    txt.focus();txt.select();document.execCommand("copy");
+    setPromptStatus("已複製目前 Prompt。");
+  }
+}
+function exportPromptsOnlyFile(){
+  downloadJSON(`Workout_prompts_${ymd(new Date())}.json`,{version:"prompts-v1",exportedAt:new Date().toISOString(),prompts:DATA.prompts||{}});
+  setPromptStatus("已下載 Prompts JSON。");
+}
+
 function renderGuidePrompts(){
   if(!DATA.prompts)DATA.prompts=Object.assign({},DEFAULT_PROMPTS);
   Object.keys(DEFAULT_PROMPTS).forEach(k=>{
@@ -1400,17 +1543,11 @@ function renderGuidePrompts(){
 function setupPromptAutoSave(){
   document.querySelectorAll("[data-prompt-key]").forEach(el=>{
     el.addEventListener("input",()=>{
-      if(!DATA.prompts)DATA.prompts={};
-      const key=el.dataset.promptKey;
-      DATA.prompts[key]=el.value;
-      document.querySelectorAll(`[data-prompt-key="${CSS.escape(key)}"]`).forEach(other=>{
-        if(other!==el) other.value=el.value;
-      });
-      save();
+      syncPromptFields(el.dataset.promptKey,el.value,el);
     });
   });
 }
-function renderAll(){renderDashboard();renderToday();renderWeek();renderTemplates();renderLibrary();renderHistory();renderNotes();renderProgress();renderGuidePrompts();}
+function renderAll(){renderDashboard();renderToday();renderWeek();renderTemplates();renderLibrary();renderHistory();renderNotes();renderProgress();renderGuidePrompts();renderDirectPromptEditor();}
 document.body.addEventListener("click",e=>{
  const tab=e.target.closest("nav button"); if(tab){document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));tab.classList.add("on");document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));document.getElementById(tab.dataset.tab).classList.add("on");renderAll();return}
  if(e.target.id==="prev"){const d=parseYmd(cur);d.setDate(d.getDate()-1);cur=ymd(d);renderAll();return}
@@ -1451,6 +1588,18 @@ if(document.getElementById("importBackupJson")) importBackupJson.onclick=()=>cho
 if(document.getElementById("importExerciseJson")) importExerciseJson.onclick=()=>{try{const r=importExercises(JSON.parse(exerciseJson.value));exerciseMsg.textContent=`已新增/更新 ${r.added} 個動作${r.bad.length?`，格式錯誤：${r.bad.join("、")}`:""}`}catch(e){exerciseMsg.textContent="JSON 格式錯誤"}};
 if(document.getElementById("exportExerciseJson")) exportExerciseJson.onclick=()=>{downloadJSON(`Workout_exercise_library_${ymd(new Date())}.json`,DATA.exerciseLibrary||EXERCISES);exerciseMsg.textContent="已下載 Exercise Library JSON 檔"};
 if(document.getElementById("clearExerciseJson")) clearExerciseJson.onclick=()=>{exerciseJson.value="";exerciseMsg.textContent=""};
+
+const promptDirectSelectEl=document.getElementById("promptDirectSelect");
+if(promptDirectSelectEl) promptDirectSelectEl.addEventListener("change",()=>renderDirectPromptEditor());
+const promptDirectTextEl=document.getElementById("promptDirectText");
+if(promptDirectTextEl) promptDirectTextEl.addEventListener("input",()=>{
+  syncPromptFields(currentPromptKey(),promptDirectTextEl.value,promptDirectTextEl);
+  setPromptStatus("已自動儲存。");
+});
+if(document.getElementById("applyDirectPrompt")) applyDirectPrompt.onclick=()=>applyDirectPrompt();
+if(document.getElementById("resetDirectPrompt")) resetDirectPrompt.onclick=()=>resetDirectPrompt();
+if(document.getElementById("copyDirectPrompt")) copyDirectPrompt.onclick=()=>copyDirectPrompt();
+if(document.getElementById("exportPromptsOnly")) exportPromptsOnly.onclick=()=>exportPromptsOnlyFile();
 
 addNote.onclick=()=>{DATA.notes.push({date:cur,exercise:noteExercise.value||"未指定",type:noteType.value,text:noteText.value||""});noteExercise.value="";noteText.value="";save();renderAll()};
 const addActualBtn=document.getElementById("addActualExercise");
