@@ -422,7 +422,7 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
 <header>
   <div class="kicker">personal fitness os</div>
   <h1>Workout Coach OS</h1>
-  <div class="sub">12 週增肌計畫｜Week 1 基準週：先建立可追蹤的工作重量與動作品質</div>
+  <div class="sub"></div>
 </header>
 
 <nav>
@@ -446,7 +446,7 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
         <div class="heroTitle">本週訓練 Dashboard</div>
         <div class="heroSub">看趨勢，不看單日。重點是知道這週哪裡練到了、哪裡需要調整。</div>
       </div>
-      <div class="badge">v3.1</div>
+      <div class="badge">v2.0</div>
     </div>
     <div class="grid4" id="metricGrid"></div>
     <div class="note" id="dashNote"></div>
@@ -648,64 +648,6 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
     </div>
   </div>
   <div class="card prompt-card">
-    <h2>🧠 Coach Bible｜Abby 訓練決策基準</h2>
-    <div class="hint">這是系統的固定教練原則。使用 Program Generator、Weekly Review 或 AI Coach 時，請先一起提供這段內容；日後可直接在這裡編輯。</div>
-    <textarea id="prompt_coachBible" rows="34" data-prompt-key="coachBible">Workout Coach OS｜Coach Bible（Abby v1.0）
-
-【使用者與 12 週目標】
-- 使用者：女生，150 cm，體重約 44–45 kg；目前目標是 Body Recomposition。
-- 12 週挑戰目標：InBody 骨骼肌約 +1.0 kg、體脂肪約 -0.5 kg；此為挑戰方向，不以單次測量判定成敗。
-- 成功指標：主力動作可追蹤進步、每週完成率穩定、睡眠與飲食可持續、膝蓋沒有因訓練惡化。
-
-【固定週結構】
-- 週一：Gym Heavy｜大重量臀腿 + 完整背部器械 + 核心。
-- 週二：恢復日；可滑步機低強度、伸展、輕核心，晚上有家教，不排正式重量訓練。
-- 週三至週六：Home ×4；其中至少 2 天為高品質臀腿/肌肥大訓練，其餘為臀部補強、肩、基礎手臂、核心與 Bulgarian 技能練習。
-- 週日：休息或低強度滑步機與伸展。
-- 背部一週主要訓練量放週一健身房完成；居家不強迫做啞鈴划船。
-
-【肌群優先順序】
-1. S：臀與臀腿整體增肌。
-2. A：背部（體態、背寬、穩定）與肩部（比例、側後三角）。
-3. B：核心（腹肌厚度、穩定、抗旋轉）。
-4. C：手臂只維持基本肌力；不需要大量孤立訓練。
-
-【基本訓練原則】
-- 不因為 Abby 不喜歡、不熟或暫時做不好某動作就直接永久刪除；先判斷是疼痛、技巧、心肺、握力、器材或恢復問題，再給等效替代與回歸計畫。
-- 但疼痛不是硬練訊號：若出現尖銳疼痛、關節痛持續加重、姿勢明顯失控，停止該動作並改替代；不要把疼痛當作意志力問題。
-- 主力複合動作優先於孤立動作；先完成最重要的 2–3 個動作，再做臀中肌、手臂或泵感補強。
-- 以接近力竭的有效訓練為原則：主力動作多數工作組保留約 1–3 下餘力（RIR 1–3）；孤立動作可接近 RIR 0–2。不要每組都失敗。
-- 優先用雙重漸進：在指定次數範圍內，先把所有工作組做到上限且動作穩定，再小幅加重量；若沒有可加重量，增加次數、停頓、離心控制、單側版本或總組數。
-
-【Abby 個人動作檔案】
-- 槓鈴臀推：最重要臀部主力；臀感佳，可追重量。很累與心跳快可接受，但不應造成頭暈、胸痛或異常不適。
-- RDL：臀腿後側主力；保持髖折疊，不做成深蹲。重量進步要建立在脊椎與控制穩定上。
-- 深蹲：不是禁做，但大量蹲類動作容易膝蓋不舒服；大重量深蹲容易喘。保留蹲類能力，但目前不把自由深蹲當首要 PR 動作。
-- Leg Press / Hack Squat / Box Squat：是深蹲的有效替代與進步路徑，不是偷懶。依膝蓋反應、骨盆控制和器材選擇。
-- Bulgarian Split Squat：目前是 Skill Practice，不是主力增肌動作。每週保留少量徒手或輕重量練習；先學站距、平衡與臀腿發力，暫不追重量。
-- 背部：握力容易先限制。健身房以器械為主：Lat Pulldown、Chest Supported Row、Seated Cable Row、Face Pull、Straight-arm Pulldown。必要時可用拉力帶，目的在讓背先疲勞而非前臂先失敗。
-- 肩：居家可用啞鈴肩推、側平舉、反向飛鳥；肩是比例重點，但不要讓前肩過度疲勞。
-- 手臂：每週少量基本訓練即可，約二頭 2–4 組、三頭 2–4 組，並可由背部拉與肩推間接刺激。
-- 核心：可幾乎每天做 8–15 分鐘，但輪替腹直肌、下腹、抗伸展、抗旋轉與側核心；不要每天做到腹肌完全力竭。目標是腹肌厚度與控制，腹肌可見度仍受整體體脂影響。
-
-【器材與排課】
-- 健身房：週一優先安排家中無法提供的重重量與背部器械，不要把 3 個高心肺疲勞下肢大動作連續排在一起；可穿插背部器械讓呼吸恢復。
-- 居家：小槓、槓片、啞鈴、臀圈、彈力帶、滑步機；總重量有限時，用高品質高次數、單側、慢離心、停頓與更接近力竭維持刺激。
-- 有氧：滑步機為主，通常 Zone 2、20–30 分鐘；不以大量 HIIT 干擾臀腿恢復。
-
-【今日調整規則】
-- 睡眠不足或明顯疲勞：保留主力動作，但取消 PR 嘗試、減少 1–2 個低優先補強組，或將 RIR 拉高到 2–3。
-- 膝蓋不舒服：先降低活動範圍/重量並檢查動作；仍不舒服則依序改為 Leg Press、Hack Squat、Box Squat、臀橋/臀推或腿後側訓練，並在 Coach Notes 留紀錄。
-- 時間不足：保留 Priority 最高的主力動作與最少量核心；可刪手臂、孤立臀中肌和低優先泵感項目。
-- 連續兩次主力動作無法達標：不要盲目加重量；檢查睡眠、飲食、上次疲勞、休息時間與動作技術，必要時維持或退一級重建。
-
-【教練輸出要求】
-- 課表應清楚列出：動作、工作組、次數範圍、RIR/RPE、休息時間、加重量條件與替代動作。
-- 不做空泛鼓勵；要說明每個重大調整是為了肌肉刺激、技巧、疼痛管理或恢復中的哪一項。
-- 不因為目標是增肌就鼓勵無限制熱量盈餘；飲食建議以足夠蛋白質、規律吃飯與可持續恢復為核心。</textarea>
-  </div>
-
-  <div class="card prompt-card">
     <h2>📖 Project Intro｜專案介紹</h2>
     <div class="hint">未來開新對話時，可以先貼這段，讓 AI 知道 Workout OS 的定位與資料結構。</div>
     <textarea id="prompt_projectIntro" rows="18" data-prompt-key="projectIntro">Workout Coach OS 是 Personal Fitness OS 的訓練教練系統。
@@ -748,8 +690,6 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
     <h2>🏋️ Program Generator｜生成下一週課表</h2>
     <div class="hint">根據器材、目標、History、Progress、Coach Notes 生成可匯入的 Program JSON。</div>
     <textarea id="prompt_programGenerator" rows="24" data-prompt-key="programGenerator">請根據以下 Workout Coach OS 資料，幫我產生下一週可匯入的 Program JSON。
-
-先遵守「Coach Bible｜Abby 訓練決策基準」；若我同時貼上 Coach Bible，該內容優先於一般範例與舊課表。
 
 使用者條件：
 - 女生，150cm，小基數高體脂
@@ -983,8 +923,6 @@ footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:24px;lin
     <div class="hint">每週把 History、Progress、Coach Notes 貼給 AI 後，請它分析並輸出下週 Program JSON。</div>
     <textarea id="prompt_weeklyReview" rows="18" data-prompt-key="weeklyReview">請根據以下 Workout Coach OS 資料，幫我做週回顧並建議下週課表調整。
 
-先遵守「Coach Bible｜Abby 訓練決策基準」；若我同時貼上 Coach Bible，該內容優先於一般範例與舊課表。
-
 請分析：
 1. 完成率
 2. 哪些肌群頻率不足
@@ -1071,8 +1009,6 @@ Program JSON 格式：
     <div class="hint">今天時間不夠、太累、器材受限或局部痠痛時，請 AI 幫你臨時調整課表。</div>
     <textarea id="prompt_aiCoach" rows="18" data-prompt-key="aiCoach">你是 Workout Coach OS 的 AI Coach。
 
-先遵守「Coach Bible｜Abby 訓練決策基準」；若我同時貼上 Coach Bible，該內容優先於一般範例與舊課表。
-
 請根據我的即時狀態，調整今天或本週課表，並輸出可匯入 Workout Coach OS 的 Program JSON。
 
 請考慮：
@@ -1146,76 +1082,26 @@ const EXERCISES=[
 {id:"reverse_crunch",name:"Reverse Crunch",cat:"核心",equipment:"徒手",muscle:"下腹",alt:["Heel Tap"],cue:"不要甩腿。"},
 {id:"hollow",name:"Hollow Hold",cat:"核心",equipment:"徒手",muscle:"核心",alt:["Dead Bug"],cue:"腰不要拱。"},
 {id:"pallof",name:"Pallof Press",cat:"核心",equipment:"彈力帶",muscle:"抗旋轉",alt:["Side Plank"],cue:"身體不要被拉歪。"}
-,{id:"lat_pulldown",name:"Lat Pulldown",cat:"背",equipment:"滑輪器械",muscle:"闊背肌",alt:["Single-arm Cable Pulldown","Straight Arm Pulldown"],cue:"胸口微挺，手肘往下拉；必要時用拉力帶，別讓握力先限制背。",difficulty:"初階",commonMistakes:["身體後仰太多","聳肩","只用手臂拉"],note:"週一背部主力之一。"}
-,{id:"chest_supported_row",name:"Chest Supported Row",cat:"背",equipment:"器械",muscle:"中背/菱形肌/闊背",alt:["Seated Cable Row","單臂划船"],cue:"胸口貼穩，手肘往後下方拉，肩胛往後收。",difficulty:"初階",commonMistakes:["聳肩","手先累","用腰借力"],note:"可降低下背與握力限制。"}
-,{id:"seated_cable_row",name:"Seated Cable Row",cat:"背",equipment:"滑輪器械",muscle:"中背/闊背",alt:["Chest Supported Row"],cue:"坐穩、胸口打開，手肘沿身體兩側往後拉。",difficulty:"初階",commonMistakes:["身體前後甩","肩膀聳起","用二頭硬拉"],note:"週一背部主力之一。"}
-,{id:"straight_arm_pulldown",name:"Straight Arm Pulldown",cat:"背",equipment:"滑輪器械",muscle:"闊背肌",alt:["Lat Pulldown"],cue:"手肘微彎固定，想像用腋下把把手壓向大腿。",difficulty:"初階",commonMistakes:["用三頭壓","手肘彎太多","身體晃"],note:"用來建立闊背控制，不需重。"}
-,{id:"leg_press",name:"Leg Press",cat:"腿",equipment:"器械",muscle:"股四頭/臀",alt:["Hack Squat","箱式深蹲"],cue:"腳掌踩穩，膝蓋朝腳尖方向；只下放到骨盆不捲、膝蓋舒服的深度。",difficulty:"中階",commonMistakes:["膝蓋內夾","骨盆捲起","膝蓋鎖死"],note:"目前比自由深蹲更適合累積高品質蹲類訓練量。"}
-,{id:"cable_crunch",name:"Cable Crunch",cat:"核心",equipment:"滑輪器械",muscle:"腹直肌",alt:["Reverse Crunch","Hollow Hold"],cue:"肋骨往骨盆捲，屁股固定；不是用手把繩子拉下來。",difficulty:"中階",commonMistakes:["用手拉","腰硬折","屁股後坐"],note:"健身房日的腹肌厚度主力。"}
-,{id:"elliptical",name:"滑步機",cat:"有氧",equipment:"滑步機",muscle:"心肺/下肢循環",alt:["快走"],cue:"可說完整句子但微喘，維持 Zone 2。",difficulty:"初階",commonMistakes:["阻力太高影響腿部恢復","做成 HIIT"],note:"週二和週日的恢復選項。"}
-,{id:"stretching",name:"伸展",cat:"伸展",equipment:"徒手",muscle:"髖屈肌/臀/腿後側/胸椎",alt:["動態暖身"],cue:"有拉感即可，不要疼痛或憋氣。",difficulty:"初階",commonMistakes:["拉到痛","憋氣"],note:"恢復日使用。"}
-,{id:"bulgarian_learning",name:"Bulgarian Learning Set",cat:"腿",equipment:"徒手/輕啞鈴",muscle:"臀腿/單腳穩定",alt:["Step Up","箱式深蹲"],cue:"先找前腳距離；身體微前傾、骨盆穩，膝蓋跟腳尖同方向。",difficulty:"觀察",commonMistakes:["前腳太近","後腳過高","膝蓋內夾","硬追深度"],note:"技能練習，暫不追重量；疼痛則當天改 Step Up。"}
-
 ];
 const TEMPLATES=[
-{name:"Gym Heavy｜臀腿＋完整背",focus:"週一：大重量臀腿＋一週完整背部器械；下肢與背交錯，避免連續大動作造成過度喘",tags:["臀","腿","背","核心"],exercises:[
-["槓鈴臀推","4","6-8｜Week 1 先用 35-40kg 找工作重量；RIR 2；休 2.5-3 分"],
-["Lat Pulldown","3","8-12｜第 1 組保守找重量；最後組 RIR 1-2；可用拉力帶"],
-["RDL","3","6-10｜Week 1 先用 25-30kg；RIR 2；休 2-3 分"],
-["Chest Supported Row","3","8-12｜背先累，不是手先累；必要時用拉力帶"],
-["Leg Press","3","10-12｜先以空機/輕重量試深度；工作組 RIR 1-2；膝蓋痛改 Hack Squat 或箱式深蹲"],
-["Seated Cable Row","3","10-12｜控制回放 2 秒；RIR 1-2"],
-["Face Pull","2","12-15｜不聳肩，後肩與上背"],
-["Straight Arm Pulldown","2","12-15｜闊背控制，不需重"],
-["Cable Crunch","3","10-15｜腹肌主動捲起，不用手拉"]
-]},
-{name:"Home A｜肩＋臀中肌＋基本手臂",focus:"週三：肩線與臀中肌補強；手臂只做維持，不搶恢復",tags:["肩","臀","手臂"],exercises:[
-["啞鈴肩推","3","8-12｜起始每手 2-4kg；RIR 2"],
-["側平舉","3","12-20｜起始每手 1-3kg；做到 RIR 1-2"],
-["反向飛鳥","3","12-20｜慢下放，不聳肩"],
-["臀外展","3","20-30｜臀圈；最後 5 下明顯吃力"],
-["蚌式開合","2","每邊15-25｜骨盆不往後倒"],
-["啞鈴彎舉","2","10-15｜僅維持"],
-["三頭伸展","2","10-15｜僅維持"]
-]},
-{name:"Home B｜臀腿肌肥大",focus:"週四：居家主要下肢增肌日；重量有限時用高次數、慢離心與接近力竭累積刺激",tags:["臀","腿"],exercises:[
-["槓鈴臀推","4","10-15｜起始 30kg；若 4 組都可15下且 RIR>2，下次加重或加停頓"],
-["RDL","3","10-15｜起始 20-30kg；下放 2-3 秒"],
-["箱式深蹲","3","8-12｜徒手/輕負重；只做膝蓋舒服範圍；RIR 2"],
-["Step Up","2","每邊8-12｜先徒手；用踩上去那隻腳發力"],
-["臀外展","2","20-30｜最後組接近力竭"]
-]},
-{name:"Home C｜臀部孤立＋肩",focus:"週五：低恢復成本的臀部孤立與肩部第二刺激；不再堆高疲勞",tags:["臀","肩"],exercises:[
-["單腳臀橋","3","每邊10-15｜骨盆不歪；RIR 1-2"],
-["消防栓","2","每邊15-20｜臀中肌發力，腰不代償"],
-["驢踢","2","每邊15-20｜不要塌腰"],
-["側平舉","3","15-20｜停 1 秒、慢下放"],
-["反向飛鳥","2","12-20｜控制，不聳肩"]
-]},
-{name:"Home D｜單腳技能＋後側補強",focus:"週六：保加利亞蹲學習、後側補強與臀部收尾；不追 PR",tags:["臀","腿","技能"],exercises:[
-["Bulgarian Learning Set","2","每邊6-10｜徒手；先練軌跡。膝蓋痛即改 Step Up"],
-["臀橋","3","15-20｜頂點停 2 秒；RIR 1-2"],
-["RDL","2","12-15｜輕中重量、3 秒離心；不追重量"],
-["相撲深蹲","2","10-15｜膝蓋舒服才做；不適改箱式深蹲"],
-["蚌式開合","2","每邊15-25｜收尾"]
-]},
-{name:"Core Gym",focus:"週一：腹肌厚度＋穩定",tags:["核心"],exercises:[["Cable Crunch","3","10-15"],["Reverse Crunch","2","10-15"],["Plank","2","30-45秒"]]},
-{name:"Core A｜腹直肌",focus:"下腹與腹直肌控制",tags:["核心"],exercises:[["Reverse Crunch","3","10-15"],["Heel Tap","2","每邊12-20"],["Hollow Hold","2","20-35秒"]]},
-{name:"Core B｜穩定",focus:"腹橫肌與骨盆穩定",tags:["核心"],exercises:[["Dead Bug","2","每邊8-12"],["Bird Dog","2","每邊8-12"],["Plank","2","20-45秒"]]},
-{name:"Core C｜側腹抗旋轉",focus:"側核心與抗旋轉",tags:["核心"],exercises:[["Side Plank","2","每邊20-40秒"],["Pallof Press","2","每邊10-12"],["Heel Tap","2","每邊12-20"]]},
-{name:"Rest｜滑步機＋恢復",focus:"週二或週日：恢復，不追疲勞",tags:["有氧","伸展"],exercises:[["滑步機","1","20-30分鐘｜可說話的 Zone 2"],["伸展","1","8-12分鐘"],["Dead Bug","1","可選：每邊8-10"]]}
+{name:"臀腿A",focus:"臀推主導",tags:["臀","腿"],exercises:[["槓鈴臀推","4","10-12"],["RDL","4","10-12"],["Goblet Squat","3","12-15"],["臀外展","3","15-20"]]},
+{name:"臀腿B",focus:"蹲類主導",tags:["臀","腿"],exercises:[["箱式深蹲","3","10-12"],["RDL","4","10-12"],["Step Up","3","每邊8-12"],["臀橋","3","12-15"]]},
+{name:"臀腿C",focus:"臀中肌＋穩定",tags:["臀","腿"],exercises:[["單腳臀橋","3","每邊10-12"],["消防栓","3","每邊12-15"],["蚌式開合","3","15-20"],["相撲深蹲","3","12-15"]]},
+{name:"肩背A",focus:"肩線＋背",tags:["肩","背"],exercises:[["啞鈴肩推","3","8-12"],["單臂划船","3","10-12"],["側平舉","3","12-15"],["Face Pull","3","12-15"]]},
+{name:"肩背B",focus:"背＋少量手臂",tags:["肩","背","手臂"],exercises:[["俯身划船","3","10-12"],["反向飛鳥","3","12-15"],["側平舉","3","12-15"],["啞鈴彎舉","2","10-12"],["三頭伸展","2","10-12"]]},
+{name:"Core A",focus:"核心穩定",tags:["核心"],exercises:[["Dead Bug","3","每邊8-12"],["Bird Dog","3","每邊8-12"],["Plank","3","20-45秒"]]},
+{name:"Core B",focus:"腹肌＋側核心",tags:["核心"],exercises:[["Side Plank","2","每邊15-30秒"],["Heel Tap","3","12-20"],["Reverse Crunch","3","10-15"]]}
 ];
 const DEFAULT_WEEK=[
-{day:"週一",plan:["Gym Heavy｜臀腿＋完整背","Core Gym"]},
-{day:"週二",plan:["Rest｜滑步機＋恢復"]},
-{day:"週三",plan:["Home A｜肩＋臀中肌＋基本手臂","Core B｜穩定"]},
-{day:"週四",plan:["Home B｜臀腿肌肥大","Core A｜腹直肌"]},
-{day:"週五",plan:["Home C｜臀部孤立＋肩","Core C｜側腹抗旋轉"]},
-{day:"週六",plan:["Home D｜單腳技能＋後側補強","Core B｜穩定"]},
-{day:"週日",plan:["Rest｜滑步機＋恢復"]}
+{day:"週一",plan:["臀腿A","Core A"]},
+{day:"週二",plan:["肩背A"]},
+{day:"週三",plan:["Rest"]},
+{day:"週四",plan:["臀腿B","Core B"]},
+{day:"週五",plan:["肩背B"]},
+{day:"週六",plan:["臀腿C","Core A"]},
+{day:"週日",plan:["Rest"]}
 ];
 const DEFAULT_PROMPTS={
-  "coachBible": "Workout Coach OS｜Coach Bible（Abby v1.0）\n\n【使用者與 12 週目標】\n- 女生，150 cm，體重約 44–45 kg；目標為 Body Recomposition。\n- 12 週挑戰目標：InBody 骨骼肌約 +1.0 kg、體脂肪約 -0.5 kg；以趨勢與訓練表現一起判讀。\n\n【固定週結構】\n- 週一 Gym Heavy：大重量臀腿 + 完整背部器械 + 核心。\n- 週二恢復：可滑步機、伸展、輕核心；晚上有家教，不排正式重量訓練。\n- 週三至週六 Home ×4：臀腿主力、臀部補強、肩、少量手臂、核心與 Bulgarian 技能練習。\n- 週日休息。背部一週主要量放週一健身房完成。\n\n【優先順序】\nS：臀與臀腿。A：背、肩。B：核心。C：手臂僅維持基本肌力。\n\n【核心原則】\n- 不因為不喜歡、不熟或暫時做不好就永久刪除有效動作；先判斷疼痛、技巧、心肺、握力、器材或恢復問題，再安排替代與回歸。\n- 疼痛不是硬練訊號；尖銳疼痛、關節痛持續加重或姿勢失控時停止並替代。\n- 主力複合動作優先於孤立動作；多數工作組保留 RIR 1–3。\n- 進步採雙重漸進：先完成次數上限且姿勢穩定，再小幅加重量；居家重量有限時用次數、單側、慢離心、停頓或接近力竭進步。\n\n【個人動作規則】\n- 槓鈴臀推：第一臀部主力；臀感佳，可追重量。\n- RDL：後側主力；以髖折疊與控制為先。\n- 深蹲：保留能力但不是首要 PR；大量蹲類易膝蓋不適，大重量易喘。\n- Leg Press / Hack Squat / Box Squat：有效替代與進步路徑。\n- Bulgarian：Skill Practice，不是主力；每週少量徒手或輕重量，暫不追重量。\n- 背：器械優先；必要可用拉力帶，讓背而非握力成為限制。\n- 核心：每天可做 8–15 分鐘，但輪替功能，不必每天力竭。\n\n【今日調整】\n- 睡眠不足：保留主力但取消 PR、減少低優先組、提高到 RIR 2–3。\n- 膝蓋不適：先調整範圍/重量；仍不適則改 Leg Press、Hack Squat、Box Squat、臀推或腿後側。\n- 時間不足：保留主力與少量核心，先刪手臂和低優先孤立項目。\n- 連續兩次主力未達標：檢查恢復、飲食、技術與休息，不盲目加重量。\n\n【輸出要求】\n每次建議清楚列出動作、組數、次數範圍、RIR/RPE、休息時間、進步條件與替代方案；說明重大調整是為了刺激、技巧、疼痛管理或恢復。",
   "projectIntro": "Workout Coach OS 是 Personal Fitness OS 的訓練教練系統。\n\n定位：\n不是 Hevy 替代品，不是純記錄器，而是「課表 + 教練回顧 + 進度整理」。\n\n核心架構：\n1. Exercise Library：固定動作資料庫。\n2. Workout Templates：預設課表庫，例如臀腿A/B/C、肩背A/B、Core A/B，也可以新增臀腿A-2、肩背C、Core C 等變化版。\n3. Current Week：本週實際執行課表，每週可調整，也可用 Program / Current Week Import 一鍵匯入。\n4. Program Import：貼上 Program JSON，可更新 currentWeek，也可以一起更新 templates 與 exerciseLibrary。\n5. Workout Logs：訓練紀錄，可由 Hevy 截圖轉 JSON 匯入。\n6. Coach Notes：太難、不舒服、沒感覺、想替換的紀錄。\n7. Progress：完成率、肌群頻率、重量進步。\n\n使用方式：\n- 今天要練什麼 → 看 Today。\n- 用 Hevy 記錄 → 截圖丟給 AI 轉 JSON → Workout Import。\n- 想換下週課表 → 用 Program Generator Prompt 請 AI 輸出 Program JSON → Program / Current Week Import。\n- 每週檢查 → History / Progress / Coach Notes → 產生下一週 Program JSON。",
   "globalRules": "所有 Workout Coach OS 的 JSON 輸出都必須遵守：\n\n1. 使用 json code block 包裝輸出。\n2. 不要在 code block 外加入任何文字。\n3. 不要輸出解釋。\n4. code block 內必須是合法 JSON。\n5. JSON key 和 string value 必須使用雙引號。\n6. 不要使用註解。\n7. 不要使用 trailing comma。\n8. 數值使用 number；沒有重量可用 null。\n9. 若是估算或看不清楚，請加入 \"estimated\": true。\n10. 只有當使用者明確要求「純 JSON / 不要 markdown」時，才輸出裸 JSON。",
   "programGenerator": "請根據以下 Workout Coach OS 資料，幫我產生下一週可匯入的 Program JSON。\n\n使用者條件：\n- 女生，150cm，小基數高體脂\n- 目標：增肌減脂、臀腿線條、肩背線條、核心穩定\n- 器材：啞鈴、小槓鈴最高約 30kg、臀圈、彈力帶、滑步機\n- 每週可訓練 4–5 天\n- 不喜歡跑步，有氧偏好滑步機\n- 保加利亞蹲容易膝蓋不舒服，除非明確安全替代，不要設為主力\n\n請參考：\n1. 最近 2–4 週 Workout Logs\n2. Progress\n3. Coach Notes\n4. Exercise Library\n5. 目前 Current Week\n\n課表規則：\n1. 保留 60–80% 已熟悉且有效的動作。\n2. 加入 20–40% 合理變化動作。\n3. 不要每週完全推翻；以可追蹤進步為主。\n4. 避免高風險膝蓋動作與使用者標記不舒服的動作。\n5. 若新增 Template，名稱請使用「臀腿A-2」「肩背C」「Core C」這類清楚名稱。\n6. 若新增 Exercise Library 動作，請一起放進 exerciseLibrary。\n7. 可輸出 currentWeek + templates + exerciseLibrary。\n8. 如果只需要調整本週，至少輸出 currentWeek。\n\n輸出規則：\n1. 使用 json code block 包裝輸出。\n2. 不要在 code block 外加入任何文字。\n3. 不要輸出解釋。\n4. code block 內必須是合法 JSON。\n5. JSON key 和 string value 必須使用雙引號。\n6. 不要使用註解或 trailing comma。\n\n輸出格式：\n```json\n{\n  \"currentWeek\":[\n    {\"day\":\"週一\",\"plan\":[\"臀腿A-2\",\"Core A\"]},\n    {\"day\":\"週二\",\"plan\":[\"肩背A\"]},\n    {\"day\":\"週三\",\"plan\":[\"Rest\"]},\n    {\"day\":\"週四\",\"plan\":[\"臀腿B\",\"Core B\"]},\n    {\"day\":\"週五\",\"plan\":[\"肩背B\"]},\n    {\"day\":\"週六\",\"plan\":[\"臀腿C\",\"Core A\"]},\n    {\"day\":\"週日\",\"plan\":[\"Rest\"]}\n  ],\n  \"templates\":[\n    {\n      \"name\":\"臀腿A-2\",\n      \"focus\":\"臀推變化\",\n      \"tags\":[\"臀\",\"腿\"],\n      \"exercises\":[\n        [\"槓鈴臀推\",\"4\",\"8-10\"],\n        [\"RDL\",\"4\",\"10-12\"],\n        [\"Step Up\",\"3\",\"每邊8-10\"],\n        [\"臀外展\",\"3\",\"15-20\"]\n      ]\n    }\n  ],\n  \"exerciseLibrary\":[]\n}\n```",
@@ -1254,19 +1140,6 @@ function save(){localStorage.setItem(KEY,JSON.stringify(DATA))}
 function load(){try{const v=localStorage.getItem(KEY);if(v)DATA=Object.assign(DATA,JSON.parse(v))}catch(e){}
   if(!DATA.prompts)DATA.prompts=JSON.parse(JSON.stringify(DEFAULT_PROMPTS));
   DATA.prompts=Object.assign(JSON.parse(JSON.stringify(DEFAULT_PROMPTS)), DATA.prompts||{});
-  DATA.settings=DATA.settings||{};
-  if(DATA.settings.programVersion!=="v3.2-week1"){
-    const oldTemplates=Array.isArray(DATA.templates)?DATA.templates:[];
-    const byName=new Map(oldTemplates.map(t=>[t.name,t]));
-    TEMPLATES.forEach(t=>byName.set(t.name,t));
-    DATA.templates=[...byName.values()];
-    const oldExercises=Array.isArray(DATA.exerciseLibrary)?DATA.exerciseLibrary:[];
-    const byId=new Map(oldExercises.map(e=>[e.id||e.name,e]));
-    EXERCISES.forEach(e=>byId.set(e.id||e.name,e));
-    DATA.exerciseLibrary=[...byId.values()];
-    DATA.currentWeek=JSON.parse(JSON.stringify(DEFAULT_WEEK));
-    DATA.settings.programVersion="v3.2-week1";
-  }
 }
 function templateMap(){return Object.fromEntries((DATA.templates||TEMPLATES).map(t=>[t.name,t]))}
 function exInfo(name){return (DATA.exerciseLibrary||EXERCISES).find(e=>e.name===name)||{}}
@@ -1585,7 +1458,6 @@ function exportAll(){return {version:"2.0-program-prompts",exportedAt:new Date()
 
 
 const PROMPT_LABELS={
-  coachBible:"🧠 Coach Bible｜Abby 訓練決策基準",
   projectIntro:"📖 Project Intro｜專案介紹",
   globalRules:"🧱 JSON Robustness Rules",
   programGenerator:"🏋️ Program Generator｜生成下一週課表",
